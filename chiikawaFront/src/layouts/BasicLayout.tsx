@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { type ReactNode } from 'react'
 import { Outlet, useLocation, useNavigate, Link } from 'react-router-dom'
 import { ProLayout, PageContainer } from '@ant-design/pro-components'
 import { UserOutlined } from '@ant-design/icons'
@@ -8,7 +8,14 @@ import { AvatarDropdown, Footer, Question, SelectLang } from '@/components'
 import { routes } from '@/router/routes'
 import type { AppRouteObject } from '@/router/types'
 
-const menuDataRender = (routes: AppRouteObject[], parentPath = ''): any[] => {
+interface MenuItem {
+  path: string
+  name?: ReactNode
+  icon?: ReactNode
+  children?: MenuItem[]
+}
+
+const menuDataRender = (routes: AppRouteObject[], parentPath = ''): MenuItem[] => {
   return routes
     .filter((route) => route.name && !route.hideInMenu)
     .map((route) => {

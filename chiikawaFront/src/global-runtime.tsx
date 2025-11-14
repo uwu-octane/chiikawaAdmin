@@ -1,8 +1,6 @@
-import { App as AntdApp } from 'antd'
 import React, { useEffect } from 'react'
-import ReactQueryProvider from '@/react-query-provider'
 /**
- * GlobalRuntime 相当于原 Umi global.tsx 的“客户端部分”承载层。
+ * GlobalRuntime 相当于原 Umi global.tsx 的"客户端部分"承载层。
  * - 你可以在这里加入：NProgress 路由进度条、消息统一容器、PWA 更新提示等。
  * - 也方便未来注册 window 级别监听或调试开关。
  */
@@ -16,10 +14,6 @@ export default function GlobalRuntime({ children }: { children: React.ReactNode 
     }
   }, [])
 
-  // antd v5 推荐在根部包一层 <App>，用于 message、modal 等上下文
-  return (
-    <AntdApp>
-      <ReactQueryProvider>{children}</ReactQueryProvider>
-    </AntdApp>
-  )
+  // 注意：AntdApp 和 ReactQueryProvider 已移到 App.tsx 统一管理
+  return <>{children}</>
 }

@@ -1,15 +1,14 @@
-import { lazy, Suspense } from 'react'
+import { lazy, Suspense, type ComponentType } from 'react'
 import { Navigate, Outlet } from 'react-router-dom'
 import type { AppRouteObject } from './types'
 import { DashboardOutlined, UserOutlined } from '@ant-design/icons'
 
-import BasicLayout from '@/layouts/BasicLayout'
-import UserLayout from '@/layouts/UserLayout'
+import { ProtectedLayout } from '@/layouts/ProtectedLayout'
 import BlankLayout from '@/layouts/BlankLayout'
 import PageLoading from '@/loading'
 
 // Helper function for lazy loading pages
-const lazyLoad = (factory: () => Promise<any>) => {
+const lazyLoad = (factory: () => Promise<{ default: ComponentType }>) => {
   const Component = lazy(factory)
   return (
     <Suspense fallback={<PageLoading />}>
@@ -20,20 +19,13 @@ const lazyLoad = (factory: () => Promise<any>) => {
 
 export const routes: AppRouteObject[] = [
   {
-    path: '/user',
-    element: <UserLayout />,
-    name: 'User',
-    children: [
-      {
-        path: 'login',
-        name: 'Login',
-        element: lazyLoad(() => import('@/pages/user/login')),
-      },
-    ],
+    path: '/user/login',
+    name: 'Login',
+    element: lazyLoad(() => import('@/pages/user/login')),
   },
   {
     path: '/',
-    element: <BasicLayout />,
+    element: <ProtectedLayout />,
     children: [
       {
         index: true,

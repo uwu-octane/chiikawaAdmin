@@ -9,7 +9,8 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "api:gen": "orval --config orval.config.ts"
   },
   "dependencies": {
     "@ant-design/pro-components": "^2.8.10",
@@ -19,22 +20,28 @@
     "antd": "^5.28.0",
     "antd-style": "^3.7.1",
     "next-nprogress-bar": "^2.4.7",
+    "orval": "^7.16.0",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "react-router-dom": "^6.28.0",
-    "vite-plugin-imp": "^2.4.0"
+    "vite-plugin-imp": "^2.4.0",
+    "zustand": "^5.0.8"
   },
   "devDependencies": {
+    "@ant-design/icons": "^6.1.0",
     "@eslint/js": "^9.36.0",
     "@types/node": "^24.6.0",
     "@types/react": "^19.1.16",
     "@types/react-dom": "^19.1.9",
     "@vitejs/plugin-react": "^5.0.4",
+    "ajv": "^8.17.1",
+    "ajv-formats": "^3.0.1",
     "eslint": "^9.36.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.22",
     "globals": "^16.4.0",
+    "ky": "^1.13.0",
     "prettier": "^3.4.2",
     "typescript": "~5.9.3",
     "typescript-eslint": "^8.45.0",
@@ -42,6 +49,7 @@
     "vite": "npm:rolldown-vite@7.1.14"
   },
   "overrides": {
-    "vite": "npm:rolldown-vite@7.1.14"
+    "vite": "npm:rolldown-vite@7.1.14",
+    "@stoplight/spectral-core": "1.20.0"
   }
 }

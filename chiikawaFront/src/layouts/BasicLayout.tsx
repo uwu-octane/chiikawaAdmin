@@ -1,4 +1,4 @@
-import React, { type ReactNode } from 'react'
+import React, { type ReactNode, useEffect } from 'react'
 import { Outlet, useLocation, useNavigate, Link } from 'react-router-dom'
 import { ProLayout, PageContainer } from '@ant-design/pro-components'
 import { UserOutlined } from '@ant-design/icons'
@@ -7,6 +7,8 @@ import defaultSettings from '@/config/defaultSettings'
 import { AvatarDropdown, Footer, Question, SelectLang } from '@/components'
 import { routes } from '@/router/routes'
 import type { AppRouteObject } from '@/router/types'
+import { useUser } from '@/hooks/useUser'
+import { useAuth } from '@/hooks/useAuth'
 
 interface MenuItem {
   path: string
@@ -35,6 +37,43 @@ const BasicLayout: React.FC = () => {
   const location = useLocation()
   const navigate = useNavigate()
   const mainLayoutRoutes = routes.find((r) => r.path === '/')?.children || []
+  const { profile, isLoading, hasProfile, fetchUserProfile } = useUser()
+  const { logout } = useAuth()
+
+  // 如果还没有用户信息，自动获取
+  useEffect(() => {
+    if (!hasProfile && !isLoading) {
+      fetchUserProfile()
+    }
+  }, [hasProfile, isLoading, fetchUserProfile])
+
+  // 处理 AvatarDropdown 菜单点击
+  const handleMenuSelect = (key: string) => {
+    switch (key) {
+      case 'center':
+        navigate('/profile/basic')
+        break
+      case 'settings':
+        navigate('/profile/settings')
+        break
+      default:
+        break
+    }
+  }
+
+  // 处理退出登录
+  const handleLogout = async () => {
+    try {
+      await logout()
+      navigate('/user/login', { replace: true })
+    } catch (error) {
+      console.error('Logout error', error)
+    }
+  }
+
+  // 处理头像 URL：如果为空字符串或只包含空格，返回 undefined
+  const avatarUrl = profile?.avatar_url?.trim() || undefined
+  const hasAvatar = !!avatarUrl
 
   return (
     <ProLayout
@@ -54,9 +93,14 @@ const BasicLayout: React.FC = () => {
       actionsRender={() => [<Question key="question" />, <SelectLang key="lang" />]}
       avatarProps={{
         size: 'small',
-        title: 'Chiikawa',
-        icon: <UserOutlined />,
-        render: (_, dom) => <AvatarDropdown menu>{dom}</AvatarDropdown>,
+        src: avatarUrl,
+        title: profile?.display_name || 'Chiikawa',
+        icon: !hasAvatar ? <UserOutlined /> : undefined,
+        render: (_, dom) => (
+          <AvatarDropdown menu onMenuSelect={handleMenuSelect} onLogout={handleLogout}>
+            {dom}
+          </AvatarDropdown>
+        ),
       }}
       footerRender={() => <Footer />}
       breadcrumbRender={(routers = []) => [...routers]}

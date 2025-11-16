@@ -3,8 +3,6 @@ import { GlobalOutlined, QuestionCircleOutlined } from '@ant-design/icons'
 import type { MenuProps } from 'antd'
 import { Dropdown, Space, Typography } from 'antd'
 
-export type SiderTheme = 'light' | 'dark'
-
 type LanguageKey = 'zh-CN' | 'en-US' | 'ja-JP'
 
 const languageMeta: Record<

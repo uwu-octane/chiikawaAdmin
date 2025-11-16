@@ -21,9 +21,9 @@ export const antdAppTheme: ThemeConfig = {
       'AlibabaSans, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji"',
 
     // @success-color / @warning-color / @error-color 等，也可按需覆盖
-    // colorSuccess: '#52c41a',
-    // colorWarning: '#faad14',
-    // colorError:   '#ff4d4f',
+    colorSuccess: '#52c41a',
+    colorWarning: '#faad14',
+    colorError: '#ff4d4f',
   },
 
   // 2) 组件级别细化（可覆盖 Pro 中对特定组件的定制）
@@ -39,6 +39,13 @@ export const antdAppTheme: ThemeConfig = {
     Menu: {
       // @menu-item-height
       itemHeight: 40,
+    },
+    Card: {
+      borderRadiusLG: 12,   
+      borderRadius: 12,
+    },
+    Button: {
+      defaultColor: '#1890ff',
     },
   },
 

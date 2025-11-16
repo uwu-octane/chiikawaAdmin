@@ -1,11 +1,11 @@
 import React, { useCallback } from 'react'
 import { LogoutOutlined, SettingOutlined, UserOutlined } from '@ant-design/icons'
 import type { MenuProps } from 'antd'
+import { Dropdown } from 'antd'
 import { createStyles } from 'antd-style'
+import classNames from 'classnames'
 
-import HeaderDropdown from '../HeaderDropdown'
-
-export type GlobalHeaderRightProps = {
+export type AvatarDropdownProps = {
   menu?: boolean
   children?: React.ReactNode
   onMenuSelect?: (key: string) => void
@@ -35,10 +35,15 @@ const useStyles = createStyles(({ token }) => {
         backgroundColor: token.colorBgTextHover,
       },
     },
+    dropdown: {
+      [`@media screen and (max-width: ${token.screenXS}px)`]: {
+        width: '100%',
+      },
+    },
   }
 })
 
-export const AvatarDropdown: React.FC<GlobalHeaderRightProps> = ({
+export const AvatarDropdown: React.FC<AvatarDropdownProps> = ({
   menu,
   children,
   onMenuSelect,
@@ -83,9 +88,10 @@ export const AvatarDropdown: React.FC<GlobalHeaderRightProps> = ({
   ]
 
   return (
-    <HeaderDropdown
+    <Dropdown
       placement="bottomRight"
       trigger={['click']}
+      overlayClassName={classNames(styles.dropdown)}
       menu={{
         selectedKeys: [],
         onClick: onMenuClick,
@@ -93,6 +99,6 @@ export const AvatarDropdown: React.FC<GlobalHeaderRightProps> = ({
       }}
     >
       <span className={styles.action}>{children}</span>
-    </HeaderDropdown>
+    </Dropdown>
   )
 }

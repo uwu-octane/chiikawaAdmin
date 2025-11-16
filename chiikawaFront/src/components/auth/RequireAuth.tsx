@@ -1,9 +1,9 @@
-import type { ReactNode } from 'react'
+import React, { type ReactNode } from 'react'
 import { Navigate, useLocation } from 'react-router-dom'
 import { Spin } from 'antd'
 import { useAuth } from '@/hooks/useAuth'
 
-interface RequireAuthProps {
+export type RequireAuthProps = {
   children: ReactNode
 }
 
@@ -14,7 +14,7 @@ interface RequireAuthProps {
  * - 如果未登录，跳转到登录页并记录来源路径
  * - 如果已登录，渲染子组件
  */
-export const RequireAuth: React.FC<RequireAuthProps> = ({ children }) => {
+const RequireAuth: React.FC<RequireAuthProps> = ({ children }) => {
   const { isAuthenticated, status } = useAuth()
   const location = useLocation()
 
@@ -49,3 +49,4 @@ export const RequireAuth: React.FC<RequireAuthProps> = ({ children }) => {
   return <>{children}</>
 }
 
+export default RequireAuth

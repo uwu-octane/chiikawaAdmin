@@ -12,11 +12,12 @@ import {
   WeiboCircleOutlined,
 } from '@ant-design/icons'
 import { LoginForm, ProFormCaptcha, ProFormCheckbox, ProFormText } from '@ant-design/pro-components'
-import { Alert, App, Tabs } from 'antd'
+import { Alert, Tabs } from 'antd'
 import { createStyles } from 'antd-style'
 import { useNavigate, useLocation, useSearchParams } from 'react-router-dom'
 import type { Location } from 'react-router-dom'
 import React, { useState } from 'react'
+import { useMessage } from '@/hooks/useGlobalConfig'
 
 const useStyles = createStyles(({ token }) => {
   return {
@@ -76,7 +77,7 @@ const Login: React.FC = () => {
   const [submitting, setSubmitting] = useState(false)
   const [loginError, setLoginError] = useState<string>('')
   const { styles } = useStyles()
-  const { message } = App.useApp()
+  const message = useMessage()
   const navigate = useNavigate()
   const location = useLocation()
   const [searchParams] = useSearchParams()

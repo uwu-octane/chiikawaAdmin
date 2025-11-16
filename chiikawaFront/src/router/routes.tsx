@@ -3,7 +3,7 @@ import { Navigate, Outlet } from 'react-router-dom'
 import type { AppRouteObject } from './types'
 import { DashboardOutlined, UserOutlined } from '@ant-design/icons'
 
-import { ProtectedLayout } from '@/layouts/ProtectedLayout'
+import ProtectedLayout from '@/layouts/ProtectedLayout'
 import BlankLayout from '@/layouts/BlankLayout'
 import PageLoading from '@/loading'
 

@@ -46,8 +46,46 @@
 }
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* 基础颜色 */
+  --background: 0 0% 100%;
+  --foreground: 0 0% 9%;
+
+  /* 卡片 */
+  --card: 0 0% 100%;
+  --card-foreground: 0 0% 9%;
+
+  /* 弹出框 */
+  --popover: 0 0% 100%;
+  --popover-foreground: 0 0% 9%;
+
+  /* 主色调 */
+  --primary: 0 0% 9%;
+  --primary-foreground: 0 0% 98%;
+
+  /* 次要色调 */
+  --secondary: 0 0% 96%;
+  --secondary-foreground: 0 0% 9%;
+
+  /* 柔和色调 */
+  --muted: 0 0% 96%;
+  --muted-foreground: 0 0% 45%;
+
+  /* 强调色 */
+  --accent: 0 0% 96%;
+  --accent-foreground: 0 0% 9%;
+
+  /* 破坏性操作 */
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 0 0% 98%;
+
+  /* 边框 */
+  --border: 0 0% 90%;
+  --input: 0 0% 90%;
+  --ring: 0 0% 9%;
+
+  /* 圆角 */
+  --radius: 0.5rem;
+
   color-scheme: light dark;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -57,8 +95,42 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    /* 基础颜色 */
+    --background: 0 0% 4%;
+    --foreground: 0 0% 93%;
+
+    /* 卡片 */
+    --card: 0 0% 4%;
+    --card-foreground: 0 0% 93%;
+
+    /* 弹出框 */
+    --popover: 0 0% 4%;
+    --popover-foreground: 0 0% 93%;
+
+    /* 主色调 */
+    --primary: 0 0% 98%;
+    --primary-foreground: 0 0% 9%;
+
+    /* 次要色调 */
+    --secondary: 0 0% 15%;
+    --secondary-foreground: 0 0% 98%;
+
+    /* 柔和色调 */
+    --muted: 0 0% 15%;
+    --muted-foreground: 0 0% 64%;
+
+    /* 强调色 */
+    --accent: 0 0% 15%;
+    --accent-foreground: 0 0% 98%;
+
+    /* 破坏性操作 */
+    --destructive: 0 63% 31%;
+    --destructive-foreground: 0 0% 98%;
+
+    /* 边框 */
+    --border: 0 0% 15%;
+    --input: 0 0% 15%;
+    --ring: 0 0% 83%;
   }
 }
 
@@ -141,4 +213,131 @@ ol {
   html {
     color-scheme: dark;
   }
+}
+
+/* 滚动条隐藏 */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* 动画支持 */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fade-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes zoom-in {
+  from {
+    transform: scale(0.95);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+
+@keyframes zoom-out {
+  from {
+    transform: scale(1);
+  }
+  to {
+    transform: scale(0.95);
+  }
+}
+
+@keyframes slide-in-from-top {
+  from {
+    transform: translateY(-2px);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes slide-in-from-bottom {
+  from {
+    transform: translateY(2px);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes slide-in-from-left {
+  from {
+    transform: translateX(-2px);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes slide-in-from-right {
+  from {
+    transform: translateX(2px);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+.animate-in {
+  animation-duration: 150ms;
+  animation-timing-function: ease-out;
+  animation-fill-mode: both;
+}
+
+.animate-out {
+  animation-duration: 150ms;
+  animation-timing-function: ease-in;
+  animation-fill-mode: both;
+}
+
+.fade-in-0 {
+  animation-name: fade-in;
+}
+
+.fade-out-0 {
+  animation-name: fade-out;
+}
+
+.zoom-in-95 {
+  animation-name: zoom-in;
+}
+
+.zoom-out-95 {
+  animation-name: zoom-out;
+}
+
+.slide-in-from-top-2 {
+  animation-name: slide-in-from-top;
+}
+
+.slide-in-from-bottom-2 {
+  animation-name: slide-in-from-bottom;
+}
+
+.slide-in-from-left-2 {
+  animation-name: slide-in-from-left;
+}
+
+.slide-in-from-right-2 {
+  animation-name: slide-in-from-right;
 }

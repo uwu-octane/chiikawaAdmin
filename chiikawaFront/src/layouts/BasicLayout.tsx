@@ -8,7 +8,6 @@ import { routes } from '@/router/routes'
 import type { AppRouteObject } from '@/router/types'
 import { useUser } from '@/hooks/useUser'
 import { useAuth } from '@/hooks/useAuth'
-import { ChatButton } from '@/components/chatbox/chatbutton'
 interface MenuItem {
   path: string
   name?: ReactNode
@@ -112,12 +111,6 @@ const BasicLayout: React.FC = () => {
       <PageContainer>
         <Outlet />
       </PageContainer>
-      <ChatButton
-        onClick={() => {
-          // TODO: 打开 Chat 抽屉 / 弹窗
-          console.log('open global chat')
-        }}
-      />
     </ProLayout>
   )
 }

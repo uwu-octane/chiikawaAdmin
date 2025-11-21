@@ -7,6 +7,7 @@ import AppRouter from '@/router'
 import GlobalRuntime from '@/global-runtime' // 你自己的逻辑
 import { StyleProvider } from 'antd-style'
 import '@unocss/reset/tailwind.css'
+import 'virtual:uno.css'
 import 'antd/dist/reset.css'
 import './globals.css'
 

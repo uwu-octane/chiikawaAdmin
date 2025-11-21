@@ -27,4 +27,3 @@ const Settings: ProLayoutProps & {
 }
 
 export default Settings
-

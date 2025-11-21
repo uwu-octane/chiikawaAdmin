@@ -41,7 +41,7 @@ export const antdAppTheme: ThemeConfig = {
       itemHeight: 40,
     },
     Card: {
-      borderRadiusLG: 12,   
+      borderRadiusLG: 12,
       borderRadius: 12,
     },
     Button: {

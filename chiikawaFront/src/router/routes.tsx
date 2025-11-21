@@ -1,7 +1,7 @@
 import { lazy, Suspense, type ComponentType } from 'react'
 import { Navigate, Outlet } from 'react-router-dom'
 import type { AppRouteObject } from './types'
-import { DashboardOutlined, UserOutlined } from '@ant-design/icons'
+import { DashboardOutlined, UserOutlined, RobotOutlined, WechatOutlined } from '@ant-design/icons'
 
 import ProtectedLayout from '@/layouts/ProtectedLayout'
 import BlankLayout from '@/layouts/BlankLayout'
@@ -62,6 +62,20 @@ export const routes: AppRouteObject[] = [
             name: 'Details',
             hideInMenu: true, // Usually, you don't want dynamic routes in the menu
             element: lazyLoad(() => import('@/pages/profile/basic')), // Replace with your actual component
+          },
+        ],
+      },
+      {
+        path: 'agent',
+        name: 'Agent',
+        icon: <RobotOutlined />,
+        element: <Outlet />,
+        children: [
+          {
+            path: 'chat',
+            name: 'Chat',
+            icon: <WechatOutlined />,
+            element: lazyLoad(() => import('@/pages/Agent/chatdemo')),
           },
         ],
       },

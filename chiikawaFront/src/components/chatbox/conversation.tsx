@@ -10,17 +10,8 @@ import { cn } from '@/lib/utils'
 import { HeaderExtra } from './chatboxheader'
 import { ChatDropdown } from './chatdropdown'
 import type { DropdownItem } from './chatdropdown'
-
-export type ChatRole = 'user' | 'assistant' | 'system'
-
-export interface ChatMessage {
-  id: string
-  role: ChatRole
-  content: string
-  avatar?: string
-  name?: string
-  plugins?: Array<{ type: string; payload: unknown }>
-}
+import type { UIMessage } from 'ai'
+export type ChatMessage = UIMessage
 
 interface ChatContainerProps {
   messages: ChatMessage[]
@@ -60,24 +51,43 @@ export function ChatContainer({
     />
   )
 
+  const getTextFromMessage = (message: ChatMessage): string => {
+    if (!message.parts || message.parts.length === 0) {
+      return ''
+    }
+    return message.parts
+      .filter((part) => part.type === 'text')
+      .map((part) => (part as { type: 'text'; text: string }).text)
+      .join('\n\n')
+  }
+
+  const getAvatarInfo = (m: ChatMessage): { avatar?: string; name?: string } => {
+    const meta = (m.metadata ?? {}) as { avatar?: string; name?: string }
+    return {
+      avatar: meta.avatar,
+      name: meta.name,
+    }
+  }
   // 将消息转换为 Ant Design X Conversations 需要的格式
   const conversationItems = messages.map((m) => {
+    const text = getTextFromMessage(m)
+    const { avatar, name } = getAvatarInfo(m)
     const bubbleContent = (
       <div className="[&_code]:font-mono [&_code]:text-[0.8125rem] [&_p]:my-1">
-        <MarkdownRender text={m.content} />
+        <MarkdownRender text={text} />
         {/* 预留插件渲染位 */}
-        {m.plugins?.map((p, i) => (
+        {/* {m.plugins?.map((p, i) => (
           <div key={i}>插件：{p.type}</div>
-        ))}
+        ))} */}
       </div>
     )
 
     return {
       key: m.id,
       placement: m.role === 'user' ? ('end' as const) : ('start' as const),
-      avatar: m.avatar ? (
-        <Avatar src={m.avatar} size={32}>
-          {m.name?.[0] || m.role[0].toUpperCase()}
+      avatar: avatar ? (
+        <Avatar src={avatar} size={32}>
+          {name?.[0] || m.role[0].toUpperCase()}
         </Avatar>
       ) : undefined,
       children: (

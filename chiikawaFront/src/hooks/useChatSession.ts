@@ -4,7 +4,7 @@ import { useChatStore } from '../stores/chat'
  * useChat hook - 封装 chat store 的便捷方法
  * 注意：此 hook 只管理会话元数据，消息由 Vercel AI SDK 的 useChat 管理
  */
-export const useChat = () => {
+export const useChatSession = () => {
   const {
     currentSessionId,
     currentSessionTitle,

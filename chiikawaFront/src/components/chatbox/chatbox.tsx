@@ -10,16 +10,23 @@ import {
 import { ChatButton } from './chatbutton'
 import { ActionDock } from './actiondocker'
 import { testActions } from './testactions'
-import { ChatContainer, type ChatMessage } from './conversation'
+import { ChatContainer } from './conversation'
 import ChatInput from './chatinput'
+import { useChat } from '@ai-sdk/react'
 
 export function ChatPopoverLauncher() {
-  const [messages, setMessages] = React.useState<ChatMessage[]>([])
-
   const handleNewChat = () => {
-    setMessages([])
+    // TODO: 重置会话
+    console.warn('new chat')
   }
-
+  const handleSend = async (value: string) => {
+    // TODO: 发送消息
+    console.warn('send', value)
+  }
+  const handleStop = () => {
+    // TODO: 停止生成
+    console.warn('stop')
+  }
   const triggerVariants = {
     initial: {
       opacity: 0,
@@ -60,7 +67,7 @@ export function ChatPopoverLauncher() {
                      w-[min(100vw,400px)] origin-bottom-right
                      bg-transparent border-none shadow-none p-0"
         >
-          <PopoverBody messages={messages} onNewChat={handleNewChat} />
+          <PopoverBody onNewChat={handleNewChat} onSend={handleSend} onStop={handleStop} />
         </MorphingPopoverContent>
       </MorphingPopover>
     </div>
@@ -68,13 +75,16 @@ export function ChatPopoverLauncher() {
 }
 
 type PopoverBodyProps = {
-  messages: ChatMessage[]
   onNewChat: () => void
+  onSend: (value: string) => void
+  onStop?: () => void
 }
 
-function PopoverBody({ messages, onNewChat }: PopoverBodyProps) {
+function PopoverBody({ onNewChat, onSend, onStop }: PopoverBodyProps) {
   const { isOpen, close } = useMorphingPopover()
   const contentRef = React.useRef<HTMLDivElement>(null)
+
+  const { messages, status } = useChat()
 
   React.useEffect(() => {
     if (!isOpen) return
@@ -84,6 +94,8 @@ function PopoverBody({ messages, onNewChat }: PopoverBodyProps) {
     })
     return () => cancelAnimationFrame(frame)
   }, [isOpen])
+
+  const isSending = status === 'submitted' || status === 'streaming'
 
   return (
     <div ref={contentRef} className="flex flex-col items-center gap-3 w-full">
@@ -97,7 +109,7 @@ function PopoverBody({ messages, onNewChat }: PopoverBodyProps) {
         onClose={close}
       >
         <ActionDock actions={testActions} />
-        <ChatInput />
+        <ChatInput isLoading={isSending} onSend={onSend} onStop={onStop} />
       </ChatContainer>
     </div>
   )

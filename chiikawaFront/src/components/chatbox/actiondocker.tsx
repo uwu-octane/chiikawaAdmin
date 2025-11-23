@@ -22,14 +22,14 @@ type Props = {
 export function ActionDock({ actions, className }: Props) {
   return (
     <div
-      className={cn('pointer-events-auto w-full min-h-[140px] mx-auto flex items-end', className)}
+      className={cn('pointer-events-auto w-full max-h-[40px] mx-auto flex items-end', className)}
       aria-label="AI action dock"
     >
       <div className="relative w-full flex justify-center">
         <Dock
           magnification={40}
           panelHeight={40}
-          distance={100}
+          distance={0}
           className="gap-1 bg-transparent overflow-visible dark:bg-transparent shadow-none border-0 px-1"
         >
           {actions.map((item) => {

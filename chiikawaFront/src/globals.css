@@ -216,13 +216,55 @@ ol {
 }
 
 /* 滚动条隐藏 */
-.scrollbar-hide {
-  -ms-overflow-style: none;
+/* 对 WebKit 浏览器隐藏滚动条 */
+.scrollbar-hidden::-webkit-scrollbar {
+  display: none;
+}
+
+/* 对 Firefox 隐藏滚动条 */
+.scrollbar-hidden {
   scrollbar-width: none;
 }
 
-.scrollbar-hide::-webkit-scrollbar {
-  display: none;
+/* 对旧版本 Edge / IE 可以加上 -ms-overflow-style */
+.scrollbar-hidden {
+  -ms-overflow-style: none; /* IE and Edge */
+}
+
+.scrollbar-thumb-only {
+  scrollbar-width: thin; /* 细一点 */
+  scrollbar-color: #b3b3b3 transparent; /* thumb 颜色 + track 透明 */
+}
+
+/* WebKit 系浏览器（Chrome / Edge / Safari） */
+.scrollbar-thumb-only::-webkit-scrollbar {
+  width: 6px;   /* 竖向滚动条宽度 */
+  height: 6px;  /* 横向滚动条高度 */
+}
+
+/* 轨道：完全透明，没有阴影 */
+.scrollbar-thumb-only::-webkit-scrollbar-track {
+  background: transparent;
+  box-shadow: none;
+  border-radius: 999px;
+}
+
+/* 某些浏览器还有 track-piece，一并置为透明 */
+.scrollbar-thumb-only::-webkit-scrollbar-track-piece {
+  background: transparent;
+}
+
+/* 滚动条滑块：你真正想看到的“thumb” */
+.scrollbar-thumb-only::-webkit-scrollbar-thumb {
+  background-color: #b3b3b3;
+  border-radius: 999px;
+  border: 2px solid transparent; /* 让 thumb 看起来更细一点 */
+  background-clip: padding-box;
+}
+
+/* hover 时稍微加深一点 */
+.scrollbar-thumb-only::-webkit-scrollbar-thumb:hover {
+  background-color: #8c8c8c;
 }
 
 /* 动画支持 */

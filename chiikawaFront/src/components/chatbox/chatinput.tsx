@@ -41,11 +41,15 @@ export function ChatInput({ onSend, isLoading = false, onStop, className }: Chat
     if (!trimmed) return
     if (isLoading) return
 
+    // 立即清空输入框，不等待发送完成
+    setInput('')
+
     try {
       await onSend(trimmed)
-      setInput('')
     } catch (error) {
       console.error(error)
+      // 发送失败时，可以选择恢复输入内容
+      setInput(trimmed)
     }
   }
 

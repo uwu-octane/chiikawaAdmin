@@ -91,9 +91,9 @@ function PopoverBody() {
   }, [isOpen])
 
   // 监听消息变化
-  React.useEffect(() => {
-    console.log('Messages count:', messages.length, 'Messages:', messages)
-  }, [messages])
+  //   React.useEffect(() => {
+  //     console.log('Messages count:', messages.length, 'Messages:', messages)
+  //   }, [messages])
 
   const isSending = status === 'submitted' || status === 'streaming'
 

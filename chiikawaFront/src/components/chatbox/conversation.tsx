@@ -33,7 +33,7 @@ function MarkdownRender({ text }: { text: string }) {
 export function ChatContainer({
   messages,
   children,
-  height = 520,
+  height = 680,
   className,
   onNewChat,
   onToggleSidebar,
@@ -78,6 +78,9 @@ export function ChatContainer({
       messages.map((m) => {
         const text = getTextFromMessage(m)
         const { avatar, name } = getAvatarInfo(m)
+        const isUser = m.role === 'user'
+        const isAssistant = m.role === 'assistant'
+
         const bubbleContent = (
           <div className="[&_code]:font-mono [&_code]:text-[0.8125rem] [&_p]:my-1">
             <MarkdownRender text={text} />
@@ -90,7 +93,7 @@ export function ChatContainer({
 
         return {
           key: m.id,
-          placement: m.role === 'user' ? ('end' as const) : ('start' as const),
+          placement: isUser ? ('end' as const) : ('start' as const),
           avatar: avatar ? (
             <Avatar src={avatar} size={32}>
               {name?.[0] || m.role[0].toUpperCase()}
@@ -98,18 +101,18 @@ export function ChatContainer({
           ) : undefined,
           role: m.role,
           content: bubbleContent,
-          // children: (
-          //   <Bubble
-          //     content={bubbleContent}
-          //     variant={m.role === 'user' ? 'shadow' : 'borderless'}
-          //     styles={{
-          //       content: {
-          //         backgroundColor: m.role === 'user' ? '#1677ff' : '#f5f5f5',
-          //         color: m.role === 'user' ? '#fff' : '#000',
-          //       },
-          //     }}
-          //   />
-          // ),
+          variant: isUser ? ('shadow' as const) : ('borderless' as const),
+          styles: {
+            content: {
+              borderRadius: 28,
+              backgroundColor: isUser ? '#e4e4e7' : 'transparent',
+              boxShadow: isAssistant ? 'none' : undefined,
+              lineHeight: '1.6',
+              padding: '2px 10px',
+              minHeight: '20px',
+              maxWidth: isUser ? '75%' : '90%',
+            },
+          },
         }
       }),
     [messages],
@@ -125,9 +128,9 @@ export function ChatContainer({
       extra={HeaderExtra(onNewChat, onToggleSidebar, onClose)}
       className={cn(
         'rounded-2xl overflow-hidden w-full',
-        '[&_.ant-card-head]:min-h-[28px] [&_.ant-card-head]:px-3 [&_.ant-card-head]:py-1.5 [&_.ant-card-head]:border-b-0',
+        '[&_.ant-card-head]:min-h-[10px] [&_.ant-card-head]:px-3 [&_.ant-card-head]:py-1 [&_.ant-card-head]:border-b-0',
         '[&_.ant-card-head-title]:border-b-0 [&_.ant-card-head-title]:leading-5 [&_.ant-card-head-title]:p-0',
-        '[&_.ant-card-body]:flex [&_.ant-card-body]:flex-col [&_.ant-card-body]:p-1',
+        '[&_.ant-card-body]:flex [&_.ant-card-body]:flex-col [&_.ant-card-body]:px-1 [&_.ant-card-body]:py-0',
         className,
       )}
       style={
@@ -137,19 +140,24 @@ export function ChatContainer({
       }
       styles={{
         body: {
-          height: typeof height === 'number' ? `${height}px` : height,
+          minHeight: '480px', // 最小高度
+          maxHeight: typeof height === 'number' ? `${height}px` : height, // 最大高度
+          height: 'auto', // 自动高度，根据内容增长
         },
       }}
     >
       {/* 会话主体 - 使用 Ant Design X 的 Conversations 组件 */}
-      <div className="flex-1 overflow-hidden flex flex-col text-[0.6rem] leading-6 font-sans">
-        <div className="flex-1 px-4 py-3 overflow-y-auto">
-          <Bubble.List items={conversationItems} autoScroll />
-        </div>
+      <div className="flex-1 overflow-hidden flex flex-col text-[0.6rem] leading-6 font-sans pt-2 pb-1">
+        <Bubble.List
+          items={conversationItems}
+          autoScroll
+          style={{ overflowY: 'auto' }}
+          className="scrollbar-thumb-only"
+        />
       </div>
 
       {/* 底部输入区（来自外部） */}
-      <div className="border-0 p-0">{children}</div>
+      <div className="border-0 py-1">{children}</div>
     </Card>
   )
 }

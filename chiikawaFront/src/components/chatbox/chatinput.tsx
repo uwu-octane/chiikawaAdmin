@@ -14,7 +14,7 @@ import { cn } from '@/lib/utils'
 
 type ChatInputProps = {
   /** 发送消息（点击按钮或按下 Enter 时触发），由父组件实现真正的发送逻辑 */
-  onSend: (value: string) => void | Promise<void>
+  onSend: (value: string) => Promise<void>
   /** 当前是否处于“生成中 / 发送中”状态，用来控制 UI */
   isLoading?: boolean
   /** 点击停止按钮时触发（可选） */
@@ -41,19 +41,12 @@ export function ChatInput({ onSend, isLoading = false, onStop, className }: Chat
     if (!trimmed) return
     if (isLoading) return
 
-    // 把当前内容交给父组件
-    const maybePromise = onSend(trimmed)
-
-    // 如果父组件没有特殊需求，这里可以直接清空
-    if (maybePromise instanceof Promise) {
-      // 父组件可能有错误处理，这里不阻塞清空
-      // 也可以根据需要改成 await 再清空
-      maybePromise.catch(() => {
-        // 可以在这里做一些本地日志
-      })
+    try {
+      await onSend(trimmed)
+      setInput('')
+    } catch (error) {
+      console.error(error)
     }
-
-    setInput('')
   }
 
   const handleButtonClick = () => {

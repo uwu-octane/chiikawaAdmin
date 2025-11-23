@@ -10,23 +10,12 @@ import {
 import { ChatButton } from './chatbutton'
 import { ActionDock } from './actiondocker'
 import { testActions } from './testactions'
-import { ChatContainer } from './conversation'
+import { ChatContainer, type ChatMessage } from './conversation'
 import ChatInput from './chatinput'
 import { useChat } from '@ai-sdk/react'
+import { DefaultChatTransport } from 'ai'
 
 export function ChatPopoverLauncher() {
-  const handleNewChat = () => {
-    // TODO: 重置会话
-    console.warn('new chat')
-  }
-  const handleSend = async (value: string) => {
-    // TODO: 发送消息
-    console.warn('send', value)
-  }
-  const handleStop = () => {
-    // TODO: 停止生成
-    console.warn('stop')
-  }
   const triggerVariants = {
     initial: {
       opacity: 0,
@@ -67,24 +56,30 @@ export function ChatPopoverLauncher() {
                      w-[min(100vw,400px)] origin-bottom-right
                      bg-transparent border-none shadow-none p-0"
         >
-          <PopoverBody onNewChat={handleNewChat} onSend={handleSend} onStop={handleStop} />
+          <PopoverBody />
         </MorphingPopoverContent>
       </MorphingPopover>
     </div>
   )
 }
 
-type PopoverBodyProps = {
-  onNewChat: () => void
-  onSend: (value: string) => void
-  onStop?: () => void
-}
-
-function PopoverBody({ onNewChat, onSend, onStop }: PopoverBodyProps) {
+function PopoverBody() {
   const { isOpen, close } = useMorphingPopover()
   const contentRef = React.useRef<HTMLDivElement>(null)
 
-  const { messages, status } = useChat()
+  const {
+    //id: chatId,
+    messages,
+    status,
+    //error,
+    sendMessage,
+    setMessages,
+    stop,
+  } = useChat<ChatMessage>({
+    transport: new DefaultChatTransport({
+      api: 'http://localhost:8989/api/chat-round-vercel-stream',
+    }),
+  })
 
   React.useEffect(() => {
     if (!isOpen) return
@@ -95,8 +90,39 @@ function PopoverBody({ onNewChat, onSend, onStop }: PopoverBodyProps) {
     return () => cancelAnimationFrame(frame)
   }, [isOpen])
 
+  // 监听消息变化
+  React.useEffect(() => {
+    console.log('Messages count:', messages.length, 'Messages:', messages)
+  }, [messages])
+
   const isSending = status === 'submitted' || status === 'streaming'
 
+  const handleSend = async (value: string) => {
+    const trimmed = value.trim()
+    if (!trimmed) return
+
+    console.log('Sending message:', trimmed)
+
+    // 最简单版本：只发文本
+    await sendMessage({ text: trimmed })
+
+    // 如果以后要带上 sessionId / 其他 body，可以这样：
+    // await sendMessage(
+    //   { text: trimmed },
+    //   { body: { sessionId: currentSessionId } }
+    // )
+  }
+
+  const handleNewChat = () => {
+    // 先只清空本地 UI 消息，等接上 session store 再扩展
+    //todo
+    setMessages([])
+  }
+
+  const handleStop = () => {
+    //todo
+    stop()
+  }
   return (
     <div ref={contentRef} className="flex flex-col items-center gap-3 w-full">
       <ChatContainer
@@ -104,12 +130,12 @@ function PopoverBody({ onNewChat, onSend, onStop }: PopoverBodyProps) {
         activeItemId=""
         onSelect={() => {}}
         messages={messages}
-        onNewChat={onNewChat}
+        onNewChat={handleNewChat}
         onToggleSidebar={() => {}}
         onClose={close}
       >
         <ActionDock actions={testActions} />
-        <ChatInput isLoading={isSending} onSend={onSend} onStop={onStop} />
+        <ChatInput isLoading={isSending} onSend={handleSend} onStop={handleStop} />
       </ChatContainer>
     </div>
   )

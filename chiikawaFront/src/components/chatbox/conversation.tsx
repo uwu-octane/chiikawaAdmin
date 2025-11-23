@@ -2,7 +2,7 @@
 
 import * as React from 'react'
 import { Card, Avatar } from 'antd'
-import { Conversations, Bubble } from '@ant-design/x'
+import { Bubble } from '@ant-design/x'
 import ReactMarkdown from 'react-markdown'
 import rehypeRaw from 'rehype-raw'
 import rehypeHighlight from 'rehype-highlight'
@@ -53,12 +53,15 @@ export function ChatContainer({
 
   const getTextFromMessage = (message: ChatMessage): string => {
     if (!message.parts || message.parts.length === 0) {
+      console.warn('Message has no parts:', message)
       return ''
     }
-    return message.parts
+
+    const textParts = message.parts
       .filter((part) => part.type === 'text')
       .map((part) => (part as { type: 'text'; text: string }).text)
-      .join('\n\n')
+
+    return textParts.join('\n\n')
   }
 
   const getAvatarInfo = (m: ChatMessage): { avatar?: string; name?: string } => {
@@ -68,42 +71,49 @@ export function ChatContainer({
       name: meta.name,
     }
   }
+
   // 将消息转换为 Ant Design X Conversations 需要的格式
-  const conversationItems = messages.map((m) => {
-    const text = getTextFromMessage(m)
-    const { avatar, name } = getAvatarInfo(m)
-    const bubbleContent = (
-      <div className="[&_code]:font-mono [&_code]:text-[0.8125rem] [&_p]:my-1">
-        <MarkdownRender text={text} />
-        {/* 预留插件渲染位 */}
-        {/* {m.plugins?.map((p, i) => (
+  const conversationItems = React.useMemo(
+    () =>
+      messages.map((m) => {
+        const text = getTextFromMessage(m)
+        const { avatar, name } = getAvatarInfo(m)
+        const bubbleContent = (
+          <div className="[&_code]:font-mono [&_code]:text-[0.8125rem] [&_p]:my-1">
+            <MarkdownRender text={text} />
+            {/* 预留插件渲染位 */}
+            {/* {m.plugins?.map((p, i) => (
           <div key={i}>插件：{p.type}</div>
         ))} */}
-      </div>
-    )
+          </div>
+        )
 
-    return {
-      key: m.id,
-      placement: m.role === 'user' ? ('end' as const) : ('start' as const),
-      avatar: avatar ? (
-        <Avatar src={avatar} size={32}>
-          {name?.[0] || m.role[0].toUpperCase()}
-        </Avatar>
-      ) : undefined,
-      children: (
-        <Bubble
-          content={bubbleContent}
-          variant={m.role === 'user' ? 'shadow' : 'borderless'}
-          styles={{
-            content: {
-              backgroundColor: m.role === 'user' ? '#1677ff' : '#f5f5f5',
-              color: m.role === 'user' ? '#fff' : '#000',
-            },
-          }}
-        />
-      ),
-    }
-  })
+        return {
+          key: m.id,
+          placement: m.role === 'user' ? ('end' as const) : ('start' as const),
+          avatar: avatar ? (
+            <Avatar src={avatar} size={32}>
+              {name?.[0] || m.role[0].toUpperCase()}
+            </Avatar>
+          ) : undefined,
+          role: m.role,
+          content: bubbleContent,
+          // children: (
+          //   <Bubble
+          //     content={bubbleContent}
+          //     variant={m.role === 'user' ? 'shadow' : 'borderless'}
+          //     styles={{
+          //       content: {
+          //         backgroundColor: m.role === 'user' ? '#1677ff' : '#f5f5f5',
+          //         color: m.role === 'user' ? '#fff' : '#000',
+          //       },
+          //     }}
+          //   />
+          // ),
+        }
+      }),
+    [messages],
+  )
 
   return (
     <Card
@@ -133,8 +143,8 @@ export function ChatContainer({
     >
       {/* 会话主体 - 使用 Ant Design X 的 Conversations 组件 */}
       <div className="flex-1 overflow-hidden flex flex-col text-[0.6rem] leading-6 font-sans">
-        <div className="flex-1 px-4 py-3 overflow-y-auto [&>*+*]:mt-4">
-          <Conversations items={conversationItems} />
+        <div className="flex-1 px-4 py-3 overflow-y-auto">
+          <Bubble.List items={conversationItems} autoScroll />
         </div>
       </div>
 

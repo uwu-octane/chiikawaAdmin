@@ -1,4 +1,7 @@
-@unocss all;
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 /* AlibabaSans 字体定义 */
 @font-face {
   font-family: "AlibabaSans";

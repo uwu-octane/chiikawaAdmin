@@ -3,9 +3,10 @@
 import * as React from 'react'
 import { Card, Avatar } from 'antd'
 import { Bubble } from '@ant-design/x'
-import ReactMarkdown from 'react-markdown'
-import rehypeRaw from 'rehype-raw'
-import rehypeHighlight from 'rehype-highlight'
+import { XMarkdown } from '@ant-design/x-markdown'
+// import ReactMarkdown from 'react-markdown'
+// import rehypeRaw from 'rehype-raw'
+// import rehypeHighlight from 'rehype-highlight'
 import { cn } from '@/lib/utils'
 import { HeaderExtra } from './chatboxheader'
 import { ChatDropdown } from './chatdropdown'
@@ -27,8 +28,50 @@ interface ChatContainerProps {
 }
 
 function MarkdownRender({ text }: { text: string }) {
-  return <ReactMarkdown rehypePlugins={[rehypeRaw, rehypeHighlight]}>{text}</ReactMarkdown>
+  //return <ReactMarkdown rehypePlugins={[rehypeRaw, rehypeHighlight]}>{text}</ReactMarkdown>
+  return <XMarkdown>{text}</XMarkdown>
 }
+
+const testText = `
+Here's a Python code block example that demonstrates how to calculate Fibonacci numbers:
+
+\`\`\` python
+def fibonacci(n):
+    """
+    Calculate the nth Fibonacci number
+    :param n: The position in the Fibonacci sequence (must be a positive integer)
+    :return: The value at position n
+    """
+    if n <= 0:
+        return 0
+    elif n == 1:
+        return 1
+    else:
+        a, b = 0, 1
+        for _ in range(2, n+1):
+            a, b = b, a + b
+        return b
+
+# Example usage
+if __name__ == "__main__":
+    num = 10
+    print(f"The {num}th Fibonacci number is: {fibonacci(num)}")
+    
+    # Print the first 15 Fibonacci numbers
+    print("First 15 Fibonacci numbers:")
+    for i in range(1, 16):
+        print(fibonacci(i), end=" ")
+\`\`\`
+
+This code includes:
+
+1. A function to compute Fibonacci numbers
+2. Docstring documentation
+3. Example usage in the main block
+4. A loop to print the first 15 numbers
+
+You can modify the parameters or output format as needed. The Fibonacci sequence here starts with fib(1) = 1, fib(2) = 1.
+`
 
 export function ChatContainer({
   messages,
@@ -56,7 +99,6 @@ export function ChatContainer({
       console.warn('Message has no parts:', message)
       return ''
     }
-
     const textParts = message.parts
       .filter((part) => part.type === 'text')
       .map((part) => (part as { type: 'text'; text: string }).text)
@@ -71,7 +113,7 @@ export function ChatContainer({
       name: meta.name,
     }
   }
-
+  //console.log('messages', messages)
   // 将消息转换为 Ant Design X Conversations 需要的格式
   const conversationItems = React.useMemo(
     () =>
@@ -84,6 +126,7 @@ export function ChatContainer({
         const bubbleContent = (
           <div className="[&_code]:font-mono [&_code]:text-[0.8125rem] [&_p]:my-1">
             <MarkdownRender text={text} />
+            <MarkdownRender text={testText} />
             {/* 预留插件渲染位 */}
             {/* {m.plugins?.map((p, i) => (
           <div key={i}>插件：{p.type}</div>
@@ -108,9 +151,9 @@ export function ChatContainer({
               backgroundColor: isUser ? '#e4e4e7' : 'transparent',
               boxShadow: isAssistant ? 'none' : undefined,
               lineHeight: '1.6',
-              padding: '2px 10px',
+              padding: '2px 12px',
               minHeight: '20px',
-              maxWidth: isUser ? '75%' : '90%',
+              //maxWidth: isUser ? '100%' : '90%',
             },
           },
         }
@@ -133,13 +176,9 @@ export function ChatContainer({
         '[&_.ant-card-body]:flex [&_.ant-card-body]:flex-col [&_.ant-card-body]:px-1 [&_.ant-card-body]:py-0',
         className,
       )}
-      style={
-        {
-          '--chatbox-body-height': typeof height === 'number' ? `${height}px` : height,
-        } as React.CSSProperties
-      }
       styles={{
         body: {
+          //height: typeof height === 'number' ? `${height}px` : height,
           minHeight: '480px', // 最小高度
           maxHeight: typeof height === 'number' ? `${height}px` : height, // 最大高度
           height: 'auto', // 自动高度，根据内容增长
@@ -147,12 +186,12 @@ export function ChatContainer({
       }}
     >
       {/* 会话主体 - 使用 Ant Design X 的 Conversations 组件 */}
-      <div className="flex-1 overflow-hidden flex flex-col text-[0.6rem] leading-6 font-sans pt-2 pb-1">
+      <div className="flex-1 overflow-hidden flex text-[0.6rem] leading-6 font-sans pt-2 pb-1">
         <Bubble.List
           items={conversationItems}
-          autoScroll
-          style={{ overflowY: 'auto' }}
-          className="scrollbar-thumb-only"
+          autoScroll={false}
+          //style={{ overflowY: 'auto', height: '100%' }}
+          className="scrollbar-thumb-only overflow-y-auto"
         />
       </div>
 

@@ -1,8 +1,9 @@
 import path from 'node:path'
 import { defineConfig, loadEnv } from 'vite'
 import react from '@vitejs/plugin-react'
-import UnoCSS from 'unocss/vite'
 import vitePluginImp from 'vite-plugin-imp'
+import tailwindcss from 'tailwindcss'
+import autoprefixer from 'autoprefixer'
 
 // https://vite.dev/config/
 export default defineConfig(({ mode }) => {
@@ -11,7 +12,6 @@ export default defineConfig(({ mode }) => {
   return {
     plugins: [
       react(),
-      UnoCSS(),
       vitePluginImp({
         libList: [
           {
@@ -25,6 +25,9 @@ export default defineConfig(({ mode }) => {
       alias: [{ find: '@/', replacement: path.resolve(__dirname, 'src') + '/' }],
     },
     css: {
+      postcss: {
+        plugins: [tailwindcss, autoprefixer],
+      },
       preprocessorOptions: {
         less: {
           javascriptEnabled: true,

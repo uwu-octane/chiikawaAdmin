@@ -26,45 +26,44 @@ import { cardContainerStyles, conversationStyles, messageStyles } from './ui/sty
 export type ChatMessage = UIMessage
 
 interface ChatContainerProps {
+  // 数据
   messages: ChatMessage[]
-  children?: React.ReactNode
-  height?: number | string
-  className?: string
+  copiedMessageId: string | null
+  items: DropdownItem[]
+  activeItemId: string
+
+  // 回调（从外部传入）
   onNewChat: () => void
   onToggleSidebar: () => void
   onClose: () => void
-  items: DropdownItem[]
-  activeItemId: string
   onSelect: (id: string) => void
   onRegenerate?: () => void
   onEditUserMessage?: (message: ChatMessage) => void
+  onCopy: (text: string, messageId: string) => Promise<void>
+
+  // UI
+  children?: React.ReactNode
+  height?: number | string
+  className?: string
 }
 
 export function ChatContainer({
   messages,
-  children,
-  height = 680,
-  className,
+  copiedMessageId,
+  items,
+  activeItemId,
   onNewChat,
   onToggleSidebar,
   onClose,
-  items,
-  activeItemId,
   onSelect,
   onRegenerate,
   onEditUserMessage,
+  onCopy,
+  children,
+  height = 680,
+  className,
 }: ChatContainerProps) {
-  const [copiedMessageId, setCopiedMessageId] = React.useState<string | null>(null)
-
-  const handleCopy = async (text: string, messageId: string) => {
-    try {
-      await navigator.clipboard.writeText(text)
-      setCopiedMessageId(messageId)
-      setTimeout(() => setCopiedMessageId(null), 3000)
-    } catch (e) {
-      console.error('Copy failed', e)
-    }
-  }
+  // 纯展示组件，不包含状态和业务逻辑
 
   const headerTitle = (
     <ChatDropdown
@@ -130,7 +129,7 @@ export function ChatContainer({
                         {/* Copy 按钮 */}
                         <MessageAction
                           onClick={() => {
-                            handleCopy(text, message.id)
+                            void onCopy(text, message.id)
                           }}
                           label={copiedMessageId === message.id ? 'Copied' : 'Copy'}
                         >
@@ -162,7 +161,7 @@ export function ChatContainer({
                         )}
                         <MessageAction
                           onClick={() => {
-                            handleCopy(text, message.id)
+                            void onCopy(text, message.id)
                           }}
                           label={copiedMessageId === message.id ? 'Copied' : 'Copy'}
                           //tooltip="Copy to clipboard"

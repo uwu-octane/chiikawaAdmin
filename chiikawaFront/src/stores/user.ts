@@ -3,12 +3,12 @@ import { persist, createJSONStorage } from 'zustand/middleware'
 import type { UserInfoResp } from '../api/generated/schemas'
 import { getUserInfo } from '../api/generated/user/user'
 
-// ====== 类型定义 ======
+// ====== Type definitions ======
 
 export type UserStatus = 'idle' | 'loading' | 'loaded' | 'error'
 
 export interface UserState {
-  // 用户档案（当前登录用户）
+  // user profile (current logged in user)
   profile: UserInfoResp | null
   status: UserStatus
   error: string | null
@@ -20,7 +20,7 @@ export interface UserState {
   clearError: () => void
 }
 
-// ====== store 实现 ======
+// ====== store implementation ======
 export const useUserStore = create<UserState>()(
   persist(
     (set) => ({
@@ -56,7 +56,7 @@ export const useUserStore = create<UserState>()(
           })
         } catch (err) {
           console.error('fetchUserProfile error', err)
-          const message = err instanceof Error ? err.message : '获取用户信息失败'
+          const message = err instanceof Error ? err.message : 'fetch user information failed'
           set({
             status: 'error',
             error: message,
@@ -67,7 +67,7 @@ export const useUserStore = create<UserState>()(
     {
       name: 'user-store',
       storage: createJSONStorage(() => window.localStorage),
-      // 可以只持久化 profile，status/error 属于 runtime
+      // only persist profile, status/error are runtime states
       partialize: (state) => ({
         profile: state.profile,
       }),

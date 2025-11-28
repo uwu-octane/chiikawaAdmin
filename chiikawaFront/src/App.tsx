@@ -6,6 +6,7 @@ import { antdAppTheme } from '@/theme/antdTheme'
 import AppRouter from '@/router'
 import GlobalRuntime from '@/global-runtime' // 你自己的逻辑
 import { StyleProvider } from 'antd-style'
+import { ChatManagerProvider } from '@/contexts/chatContext'
 import 'antd/dist/reset.css'
 import './globals.css'
 
@@ -16,7 +17,10 @@ export const App: React.FC = () => {
       <AntdApp>
         <GlobalRuntime>
           <StyleProvider>
-            <AppRouter />
+            {/* ChatManagerProvider 管理多个 Chat 实例 + 消息持久化 */}
+            <ChatManagerProvider>
+              <AppRouter />
+            </ChatManagerProvider>
           </StyleProvider>
         </GlobalRuntime>
       </AntdApp>

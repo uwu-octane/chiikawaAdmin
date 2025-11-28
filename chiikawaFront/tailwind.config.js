@@ -62,8 +62,24 @@ export default {
       boxShadow: {
         xs: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
       },
+      keyframes: {
+        'message-fade-in-blur': {
+          '0%': {
+            opacity: '0',
+            transform: 'translateY(8px)',
+            filter: 'blur(8px)',
+          },
+          '100%': {
+            opacity: '1',
+            transform: 'translateY(0)',
+            filter: 'blur(0)',
+          },
+        },
+      },
+      animation: {
+        'message-fade-in-blur': 'message-fade-in-blur 0.35s ease-out forwards',
+      },
     },
   },
   plugins: [],
 }
-

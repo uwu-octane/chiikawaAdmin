@@ -68,12 +68,12 @@ export const AvatarDropdown: React.FC<AvatarDropdownProps> = ({
           {
             key: 'center',
             icon: <UserOutlined />,
-            label: '个人中心',
+            label: 'Profile',
           },
           {
             key: 'settings',
             icon: <SettingOutlined />,
-            label: '个人设置',
+            label: 'Settings',
           },
           {
             type: 'divider' as const,
@@ -83,7 +83,7 @@ export const AvatarDropdown: React.FC<AvatarDropdownProps> = ({
     {
       key: 'logout',
       icon: <LogoutOutlined />,
-      label: '退出登录',
+      label: 'Logout',
     },
   ]
 

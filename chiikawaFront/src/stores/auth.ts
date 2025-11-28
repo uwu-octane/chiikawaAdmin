@@ -5,14 +5,14 @@ import { login, logout, logoutAll, me, refresh } from '../api/generated/auth/aut
 import { getUserInfo } from '../api/generated/user/user'
 import { useUserStore } from './user'
 
-// ====== 类型定义 ======
+// ====== Type definitions ======
 
 export type AuthStatus = 'idle' | 'checking' | 'authenticated' | 'unauthenticated'
 
 export interface AuthTokens {
   accessToken: string
   tokenType: string
-  expiresAt: number // 毫秒时间戳
+  expiresAt: number
   sessionId?: string
 }
 
@@ -30,14 +30,14 @@ export interface AuthState {
   fetchUserInfo: () => Promise<void>
   logout: (all?: boolean) => Promise<void>
 
-  // 辅助：清空错误
+  // helper: clear error
   clearError: () => void
 }
 
-// ====== 从 LoginResp 映射到前端可用 tokens ======
+// ====== Map LoginResp to frontend usable tokens ======
 function mapLoginRespToTokens(resp: LoginResp): AuthTokens {
   const now = Date.now()
-  const expiresInMs = resp.expires_in * 1000 // 后端返回的是秒，转换为毫秒
+  const expiresInMs = resp.expires_in * 1000 // backend returns seconds, convert to milliseconds
 
   return {
     accessToken: resp.access_token,
@@ -47,7 +47,7 @@ function mapLoginRespToTokens(resp: LoginResp): AuthTokens {
   }
 }
 
-// ====== 保存 token 到 localStorage（与 client.ts 保持一致） ======
+// ====== Save token to localStorage (consistent with client.ts) ======
 function saveTokenToLocalStorage(token: string) {
   localStorage.setItem('access_token', token)
 }
@@ -56,7 +56,7 @@ function removeTokenFromLocalStorage() {
   localStorage.removeItem('access_token')
 }
 
-// ====== store 实现 ======
+// ====== store implementation ======
 export const useAuthStore = create<AuthState>()(
   persist(
     (set, get) => ({
@@ -68,7 +68,7 @@ export const useAuthStore = create<AuthState>()(
 
       clearError: () => set({ error: null }),
 
-      // 登录：成功后写入 tokens，并把状态设为 authenticated
+      // login: write tokens to localStorage and set status to authenticated after successful login
       async login(payload) {
         set({ status: 'checking', error: null })
 
@@ -76,7 +76,7 @@ export const useAuthStore = create<AuthState>()(
           const resp = await login(payload)
           const tokens = mapLoginRespToTokens(resp.data)
 
-          // 保存 token 到 localStorage（与 client.ts 保持一致）
+          // save token to localStorage (consistent with client.ts)
           saveTokenToLocalStorage(tokens.accessToken)
 
           set({
@@ -85,18 +85,17 @@ export const useAuthStore = create<AuthState>()(
             error: null,
           })
 
-          // 登录成功后自动获取用户资料（用于填充 avatar dropdown 等）
-          // 使用 useUserStore 而不是 auth store 的 userInfo
+          // after login, automatically fetch user profile (for avatar dropdown, etc.)
           try {
             await useUserStore.getState().fetchUserProfile()
           } catch (err) {
-            // 获取用户信息失败不影响登录流程，只记录错误
+            // if fetching user profile fails, it does not affect the login process, only record the error
             console.warn('Failed to fetch user profile after login', err)
           }
         } catch (err) {
           console.error('login error', err)
           removeTokenFromLocalStorage()
-          const errorMessage = err instanceof Error ? err.message : '登录失败'
+          const errorMessage = err instanceof Error ? err.message : 'login failed'
           set({
             status: 'unauthenticated',
             error: errorMessage,
@@ -104,15 +103,15 @@ export const useAuthStore = create<AuthState>()(
             me: null,
             userInfo: null,
           })
-          throw err // 让调用方可以根据错误做 UI 反馈
+          throw err // let caller do UI feedback based on error
         }
       },
 
-      // 刷新 access token（使用 cookie(sid)）
+      // refresh access token (using cookie(sid))
       async refresh() {
         const { tokens } = get()
 
-        // 如果本地都没 token 了，一般就算未登录，不必刷新
+        // if no token in localStorage, usually it means not logged in, no need to refresh
         if (!tokens) {
           set({ status: 'unauthenticated' })
           return
@@ -122,7 +121,7 @@ export const useAuthStore = create<AuthState>()(
           const resp = await refresh()
           const newTokens = mapLoginRespToTokens(resp.data)
 
-          // 更新 localStorage 中的 token
+          // update token in localStorage
           saveTokenToLocalStorage(newTokens.accessToken)
 
           set({
@@ -132,8 +131,8 @@ export const useAuthStore = create<AuthState>()(
         } catch (err) {
           console.error('refresh error', err)
           removeTokenFromLocalStorage()
-          // 刷新失败，直接视为登出
-          const errorMessage = err instanceof Error ? err.message : '刷新登录状态失败'
+          // if refresh fails, directly视为登出
+          const errorMessage = err instanceof Error ? err.message : 'refresh login status failed'
           set({
             tokens: null,
             me: null,
@@ -144,32 +143,32 @@ export const useAuthStore = create<AuthState>()(
         }
       },
 
-      // 获取 JWT claims 信息（uid/jti/iat）
+      // fetch JWT claims information (uid/jti/iat)
       async fetchMe() {
         try {
           const resp = await me()
           set({ me: resp.data })
         } catch (err) {
           console.error('fetchMe error', err)
-          // 如果 401，这里不要把 tokens 立刻清掉，交给 refresh/路由守卫处理也可以
-          const errorMessage = err instanceof Error ? err.message : '获取身份信息失败'
+          // if 401, do not clear tokens immediately, let refresh/route guard handle it
+          const errorMessage = err instanceof Error ? err.message : 'fetch me information failed'
           set({ error: errorMessage })
         }
       },
 
-      // 获取展示用用户信息（头像、昵称等）
+      // fetch user information for display (avatar, nickname, etc.)
       async fetchUserInfo() {
         try {
           const resp = await getUserInfo()
           set({ userInfo: resp.data })
         } catch (err) {
           console.error('fetchUserInfo error', err)
-          const errorMessage = err instanceof Error ? err.message : '获取用户信息失败'
+          const errorMessage = err instanceof Error ? err.message : 'fetch user information failed'
           set({ error: errorMessage })
         }
       },
 
-      // 登出：默认当前 session，传 all=true 调用 LogoutAll
+      // logout: default current session, call LogoutAll if all=true
       async logout(all = false) {
         try {
           if (all) {
@@ -178,7 +177,7 @@ export const useAuthStore = create<AuthState>()(
             await logout()
           }
         } catch (err) {
-          // 这里即使后端报错，一般也没必要阻止前端清空状态
+          // if backend error, usually it is not necessary to prevent frontend from clearing state
           console.warn('logout error', err)
         } finally {
           removeTokenFromLocalStorage()
@@ -189,7 +188,7 @@ export const useAuthStore = create<AuthState>()(
             status: 'unauthenticated',
             error: null,
           })
-          // 登出时同时清空 user store
+          // clear user store when logout
           useUserStore.getState().clearUserProfile()
         }
       },
@@ -197,11 +196,11 @@ export const useAuthStore = create<AuthState>()(
     {
       name: 'auth-store',
       storage: createJSONStorage(() => window.localStorage),
-      // 只持久化 tokens，避免把各种 runtime 状态写进 storage
+      // only persist tokens, avoid writing various runtime states to storage
       partialize: (state) => ({
         tokens: state.tokens,
       }),
-      // rehydrate 之后，同步 tokens 和 access_token
+      // after rehydrate, sync tokens and access_token
       onRehydrateStorage: () => (state) => {
         const token = state?.tokens?.accessToken
         if (token) {

@@ -3,66 +3,66 @@
 import { create } from 'zustand'
 import { persist, createJSONStorage } from 'zustand/middleware'
 
-// ====== 类型定义 ======
+// ====== Type definitions ======
 
 /**
- * 会话记录（用于存储所有历史会话列表）
+ * Chat session record (for storing all history session list)
  */
 export interface ChatSessionRecord {
   id: string
   title: string
-  /** 最后一条消息的预览 */
+  /** preview of last message */
   lastMessage?: string
-  /** 消息数量 */
+  /** message count */
   messageCount: number
   createdAt: number
   updatedAt: number
-  /** 是否置顶 */
+  /** whether pinned */
   pinned?: boolean
 }
 
 export type ChatSessionStatus = 'idle' | 'loading' | 'error'
 
-// ====== State 定义 ======
+// ====== State definitions ======
 
 interface ChatState {
-  /** 当前会话 ID */
+  /** current session ID */
   currentSessionId: string | null
-  /** 当前会话标题 */
+  /** current session title */
   currentSessionTitle: string | null
-  /** 会话加载状态 */
+  /** session loading status */
   status: ChatSessionStatus
-  /** 错误信息 */
+  /** error information */
   error: string | null
 
-  /** 所有会话记录列表 */
+  /** all session record list */
   allSessions: ChatSessionRecord[]
 
   // === actions ===
-  /** 创建新会话 */
+  /** create new session */
   startNewSession: (title?: string) => string
-  /** 切换到指定会话 */
+  /** switch to specified session */
   switchToSession: (sessionId: string) => void
-  /** 删除会话 */
+  /** delete session */
   deleteSession: (sessionId: string) => void
-  /** 重命名会话 */
+  /** rename session */
   renameSession: (sessionId: string, title: string) => void
-  /** 置顶/取消置顶会话 */
+  /** toggle pin/unpin session */
   togglePinSession: (sessionId: string) => void
-  /** 更新会话元数据（消息数、最后消息等） */
+  /** update session metadata (message count, last message, etc.) */
   updateSessionMetadata: (sessionId: string, metadata: Partial<ChatSessionRecord>) => void
 
-  /** 从后端加载所有会话列表 */
+  /** load all session list from backend */
   loadAllSessions: (sessions: ChatSessionRecord[]) => void
-  /** 设置状态 */
+  /** set status */
   setStatus: (status: ChatSessionStatus) => void
-  /** 设置错误 */
+  /** set error */
   setError: (error: string | null) => void
-  /** 清空所有数据 */
+  /** clear all data */
   clearAll: () => void
 }
 
-// ====== 辅助函数 ======
+// ====== Helper functions ======
 
 const now = () => Date.now()
 
@@ -78,7 +78,7 @@ const createDefaultTitle = () => {
   return `New Chat ${id.slice(0, 8)}`
 }
 
-// ====== Store 实现 ======
+// ====== Store implementation ======
 
 export const useChatStore = create<ChatState>()(
   persist(
@@ -134,7 +134,7 @@ export const useChatStore = create<ChatState>()(
 
         set({ allSessions: newSessions })
 
-        // 如果删除的是当前会话，切换到第一个或创建新会话
+        // if deleted is current session, switch to first or create new session
         if (currentSessionId === sessionId) {
           if (newSessions.length > 0) {
             const nextSession = newSessions[0]
@@ -185,7 +185,7 @@ export const useChatStore = create<ChatState>()(
           ),
         }))
 
-        // 如果更新的是当前会话且包含 title，同步更新
+        // if updated is current session and contains title, sync update
         if (currentSessionId === sessionId && metadata.title) {
           set({ currentSessionTitle: metadata.title })
         }

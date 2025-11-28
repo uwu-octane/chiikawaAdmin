@@ -2,7 +2,7 @@ import { useAuthStore } from '../stores/auth'
 import type { LoginReq } from '../api/generated/schemas'
 
 /**
- * useAuth hook - 封装 auth store 的便捷方法
+ * useAuth hook
  */
 export const useAuth = () => {
   const {
@@ -20,18 +20,17 @@ export const useAuth = () => {
   } = useAuthStore()
 
   return {
-    // 状态
+    //status: 'checking' | 'authenticated' | 'unauthenticated'
     status,
     tokens,
     me,
     userInfo,
     error,
-    // 改进：如果有 tokens 且状态不是 unauthenticated，就认为已登录
-    // 这样刷新后只要 tokens 在，就先当作登录状态，用户体验更好
-    isAuthenticated: status === 'authenticated' || (!!tokens && status !== 'unauthenticated'),
+    // if token exists and status is not unauthenticated, then isAuthenticated is true
+    isAuthenticated: !!tokens && status !== 'unauthenticated',
     isLoading: status === 'checking',
 
-    // 方法
+    // methods
     login: async (payload: LoginReq) => {
       await login(payload)
     },

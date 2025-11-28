@@ -5,12 +5,11 @@ export type PublicRouteProps = {
 }
 
 /**
- * PublicRoute 组件 - 用于公开路由（如登录页）
- * 空实现，直接渲染子组件
+ * PublicRoute component - for public routes (e.g. login page)
+ * empty implementation, directly render children
  */
 const PublicRoute: React.FC<PublicRouteProps> = ({ children }) => {
   return <>{children}</>
 }
 
 export default PublicRoute
-

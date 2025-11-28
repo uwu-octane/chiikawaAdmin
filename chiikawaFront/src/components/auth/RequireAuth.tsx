@@ -1,7 +1,7 @@
 import React, { type ReactNode } from 'react'
 import { Navigate, useLocation } from 'react-router-dom'
-import { Spin } from 'antd'
 import { useAuth } from '@/hooks/useAuth'
+import Loading from '@/loading'
 
 export type RequireAuthProps = {
   children: ReactNode
@@ -18,34 +18,23 @@ const RequireAuth: React.FC<RequireAuthProps> = ({ children }) => {
   const { isAuthenticated, status } = useAuth()
   const location = useLocation()
 
-  // 正在验证身份时显示 Loading
+  // if checking authentication, show Loading
   if (status === 'checking') {
-    return (
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          minHeight: '100vh',
-        }}
-      >
-        <Spin size="large" tip="正在验证身份..." />
-      </div>
-    )
+    return <Loading />
   }
 
-  // 未登录：跳转到登录页，并记录来源路径
+  // if not authenticated, redirect to login page and record source path
   if (!isAuthenticated) {
     return (
       <Navigate
         to="/user/login"
         replace
-        state={{ from: location }} // 登录成功后可以跳回 from
+        state={{ from: location }} // after login, can redirect back to from
       />
     )
   }
 
-  // 已登录：放行
+  // if authenticated, allow access
   return <>{children}</>
 }
 

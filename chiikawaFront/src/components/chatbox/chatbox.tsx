@@ -12,8 +12,9 @@ import { ActionDock } from './actiondocker'
 import { testActions } from './testactions'
 import { ChatContainer, type ChatMessage } from './conversation'
 import ChatInput from './chatinput'
-import { useChat } from '@ai-sdk/react'
-import { DefaultChatTransport } from 'ai'
+import { useChatSession } from '@/hooks/useChatSession'
+import { MessageSquare } from 'lucide-react'
+import type { DropdownItem } from './chatdropdown'
 
 export function ChatPopoverLauncher() {
   const triggerVariants = {
@@ -67,20 +68,32 @@ function PopoverBody() {
   const { isOpen, close } = useMorphingPopover()
   const contentRef = React.useRef<HTMLDivElement>(null)
 
+  // 🔴 使用统一的 useChatSession hook（集成所有功能）
   const {
-    //id: chatId,
     messages,
-    status,
-    //error,
+    chatStatus,
     sendMessage,
-    setMessages,
     stop,
     regenerate,
-  } = useChat<ChatMessage>({
-    transport: new DefaultChatTransport({
-      api: 'http://localhost:8989/api/chat-round-vercel-stream',
-    }),
-  })
+    startNewSession,
+    sessions,
+    sessionId,
+    switchToSession,
+  } = useChatSession()
+
+  // ========== 状态管理 ==========
+  const [copiedMessageId, setCopiedMessageId] = React.useState<string | null>(null)
+
+  // ========== 映射 sessions 到 DropdownItem ==========
+  const dropdownItems: DropdownItem[] = React.useMemo(() => {
+    return sessions.map((session) => ({
+      id: session.id,
+      title: session.title,
+      icon: <MessageSquare className="size-3.5" />,
+      onClick: () => switchToSession(session.id),
+      updatedAt: session.updatedAt,
+    }))
+  }, [sessions, switchToSession])
 
   React.useEffect(() => {
     if (!isOpen) return
@@ -96,8 +109,11 @@ function PopoverBody() {
   //     console.log('Messages count:', messages.length, 'Messages:', messages)
   //   }, [messages])
 
-  const isSending = status === 'submitted' || status === 'streaming'
+  const isSending = chatStatus === 'submitted' || chatStatus === 'streaming'
 
+  // ========== 业务回调（集中管理）==========
+
+  // AI 相关回调
   const handleSend = async (value: string) => {
     const trimmed = value.trim()
     if (!trimmed) return
@@ -114,27 +130,62 @@ function PopoverBody() {
     // )
   }
 
-  const handleNewChat = () => {
-    // 先只清空本地 UI 消息，等接上 session store 再扩展
-    //todo
-    setMessages([])
-  }
-
   const handleStop = () => {
-    //todo
     stop()
   }
+
+  const handleRegenerate = () => {
+    regenerate()
+  }
+
+  // 会话管理回调
+  const handleNewChat = () => {
+    console.log('[PopoverBody] Creating new chat session')
+    // 创建新的会话（会自动切换到新的 Chat 实例）
+    startNewSession()
+    // 注意：页面会自动 re-render，useCurrentChat 会获取新的 sessionId
+  }
+
+  // UI 交互回调
+  const handleCopy = async (text: string, messageId: string) => {
+    try {
+      await navigator.clipboard.writeText(text)
+      setCopiedMessageId(messageId)
+      setTimeout(() => setCopiedMessageId(null), 3000)
+    } catch (e) {
+      console.error('Copy failed', e)
+    }
+  }
+
+  const handleEdit = (message: ChatMessage) => {
+    // TODO: 实现编辑逻辑
+    console.log('Edit message:', message)
+  }
+
+  // Popover 控制回调
+  const handleClose = () => {
+    close()
+  }
+
+  const handleToggleSidebar = () => {
+    // TODO: 实现侧边栏逻辑
+    console.log('Toggle sidebar')
+  }
+  // ========== 渲染 ==========
   return (
     <div ref={contentRef} className="flex flex-col items-center gap-3 w-full">
       <ChatContainer
-        items={[]}
-        activeItemId=""
-        onSelect={() => {}}
+        items={dropdownItems}
+        activeItemId={sessionId}
+        onSelect={switchToSession}
         messages={messages}
+        copiedMessageId={copiedMessageId}
         onNewChat={handleNewChat}
-        onToggleSidebar={() => {}}
-        onClose={close}
-        onRegenerate={regenerate}
+        onToggleSidebar={handleToggleSidebar}
+        onClose={handleClose}
+        onRegenerate={handleRegenerate}
+        onCopy={handleCopy}
+        onEditUserMessage={handleEdit}
       >
         <ActionDock actions={testActions} />
         <ChatInput isLoading={isSending} onSend={handleSend} onStop={handleStop} />

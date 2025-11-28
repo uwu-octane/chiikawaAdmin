@@ -1,5 +1,4 @@
 import { useAuthStore } from '../stores/auth'
-import type { LoginReq } from '../api/generated/schemas'
 
 /**
  * useAuth hook
@@ -31,9 +30,7 @@ export const useAuth = () => {
     isLoading: status === 'checking',
 
     // methods
-    login: async (payload: LoginReq) => {
-      await login(payload)
-    },
+    login,
     refresh,
     fetchMe,
     fetchUserInfo,

@@ -67,7 +67,6 @@ export const useAuthStore = create<AuthState>()(
       error: null,
 
       clearError: () => set({ error: null }),
-
       // login: write tokens to localStorage and set status to authenticated after successful login
       async login(payload) {
         set({ status: 'checking', error: null })

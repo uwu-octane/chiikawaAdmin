@@ -1,3 +1,8 @@
+/**
+ * ChatDropdown - 会话下拉选择器
+ * 用于选择历史会话或创建新会话
+ */
+
 'use client'
 
 import React from 'react'
@@ -5,6 +10,7 @@ import { Dropdown, type MenuProps } from 'antd'
 import { cn } from '@/lib/utils'
 import { ChevronDown } from 'lucide-react'
 import { Magnetic } from '../motion-primitives/magnetic'
+import { dropdownStyles } from './ui/styles'
 
 export type DropdownItem = {
   id: string
@@ -47,7 +53,7 @@ export function ChatDropdown({
             key: 'empty',
             label: '暂无历史会话',
             disabled: true,
-            className: 'text-xs text-zinc-500 cursor-default',
+            className: 'cursor-default text-xs text-zinc-500',
           },
         ]
       : safeItems.map((item) => ({
@@ -55,13 +61,7 @@ export function ChatDropdown({
           icon: item.icon ? <span className="inline-flex">{item.icon}</span> : null,
           label: <span className="truncate">{item.title}</span>,
           onClick: () => onSelect(item.id),
-          className: cn(
-            'text-[13px] py-1.5',
-            item.id === activeItemId
-              ? 'bg-zinc-100 text-zinc-900 dark:bg-zinc-800 dark:text-zinc-100'
-              : 'text-zinc-700 dark:text-zinc-200',
-            'hover:bg-zinc-100 hover:text-zinc-900 dark:hover:bg-zinc-900 dark:hover:text-zinc-100',
-          ),
+          className: dropdownStyles.item(item.id === activeItemId),
         }))),
   ]
 
@@ -72,32 +72,17 @@ export function ChatDropdown({
       placement="bottomLeft"
       overlayClassName={cn('chatdropdown-overlay', menuClassName)}
       popupRender={(menu) => (
-        <div
-          className={cn(
-            'min-w-[100px] overflow-hidden rounded-lg border border-zinc-100 bg-white p-1 shadow-lg',
-            'dark:border-zinc-800 dark:bg-zinc-950',
-            menuClassName,
-          )}
-        >
+        <div className={cn(dropdownStyles.panel, menuClassName)}>
           <div className="max-h-72 overflow-y-auto">{menu}</div>
         </div>
       )}
     >
       <button
         type="button"
-        className={cn(
-          'appearance-none bg-transparent border-0 rounded-full',
-          'inline-flex items-center justify-center cursor-pointer',
-          'transition-all duration-150 ease-in-out',
-          'hover:bg-[#f7f7f7] hover:border-black/8 hover:shadow-[0_1px_4px_rgba(0,0,0,0.06)]',
-          'active:translate-y-[0.5px] active:scale-98',
-          'dark:bg-transparent dark:border-white/8 dark:hover:bg-[#111]',
-          'px-1 rounded-md text-xs font-semibold',
-          buttonClassName,
-        )}
+        className={cn(dropdownStyles.trigger, buttonClassName)}
         aria-label="选择会话"
       >
-        <span className="truncate max-w-[14rem] text-xs px-1.5 text-zinc-800 dark:text-zinc-200">
+        <span className="max-w-[14rem] truncate px-1.5 text-xs text-zinc-800 dark:text-zinc-200">
           {label}
         </span>
         <Magnetic intensity={0.08} range={120} springOptions={{ bounce: 0.12 }}>

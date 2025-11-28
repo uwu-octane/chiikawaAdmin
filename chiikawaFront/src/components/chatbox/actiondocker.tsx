@@ -1,9 +1,14 @@
+/**
+ * ActionDock - 快捷操作栏组件
+ * 提供一组快捷操作按钮，支持磁吸效果和放大动画
+ */
+
 'use client'
 
 import React from 'react'
 import { cn } from '@/lib/utils'
-import { Magnetic } from '@/components/motion-primitives/magnetic'
-import { Dock, DockItem, DockIcon } from '@/components/motion-primitives/dock'
+import { Dock } from '@/components/motion-primitives/dock'
+import { ActionChip } from './ui/action-chip'
 
 export type ActionItem = {
   id: string
@@ -22,48 +27,37 @@ type Props = {
 export function ActionDock({ actions, className }: Props) {
   return (
     <div
-      className={cn('pointer-events-auto w-full max-h-[40px] mx-auto flex items-end', className)}
+      className={cn(
+        // 布局
+        'flex items-end',
+        // 尺寸
+        'w-full max-h-[40px]',
+        // 间距
+        'mx-auto',
+        // 交互
+        'pointer-events-auto',
+        className,
+      )}
       aria-label="AI action dock"
     >
-      <div className="relative w-full flex justify-center">
+      <div className="relative flex w-full justify-center">
         <Dock
           magnification={40}
           panelHeight={40}
           distance={0}
-          className="gap-1 bg-transparent overflow-visible dark:bg-transparent shadow-none border-0 px-1"
+          className="overflow-visible gap-1 border-0 bg-transparent px-1 shadow-none dark:bg-transparent"
         >
-          {actions.map((item) => {
-            const chipClass =
-              'aspect-square h-6 w-6 rounded-lg border-none bg-transparent' +
-              'shadow-md' +
-              'transition-transform duration-200 hover:scale-[1] active:scale-95 ' +
-              'flex items-center justify-center'
-
-            const content = (
-              <>
-                {/* <DockLabel className="text-[10px]">{item.title}</DockLabel> */}
-                <DockIcon className="[&>*]:size-4">{item.icon}</DockIcon>
-              </>
-            )
-
-            const Chip = (
-              <Magnetic intensity={0.08} range={120} springOptions={{ bounce: 0.12 }}>
-                <Magnetic intensity={0.5} range={90} springOptions={{ bounce: 0.05 }}>
-                  <DockItem className={chipClass}>{content}</DockItem>
-                </Magnetic>
-              </Magnetic>
-            )
-
-            return item.href ? (
-              <a key={item.id} href={item.href} className="inline-flex" onClick={item.onClick}>
-                {Chip}
-              </a>
-            ) : (
-              <button key={item.id} type="button" className="inline-flex" onClick={item.onClick}>
-                {Chip}
-              </button>
-            )
-          })}
+          {actions.map((item) => (
+            <ActionChip
+              key={item.id}
+              id={item.id}
+              title={item.title}
+              icon={item.icon}
+              onClick={item.onClick}
+              href={item.href}
+              className={'h-full w-full shadow-none text-neutral-600 dark:text-neutral-300'}
+            />
+          ))}
         </Dock>
       </div>
     </div>

@@ -1,17 +1,28 @@
+/**
+ * ChatContainer - 聊天容器组件
+ * 包含消息列表、操作按钮、滚动控制等功能
+ */
+
 'use client'
 
 import * as React from 'react'
-import { Card, Avatar } from 'antd'
-import { Bubble } from '@ant-design/x'
-import { XMarkdown } from '@ant-design/x-markdown'
-// import ReactMarkdown from 'react-markdown'
-// import rehypeRaw from 'rehype-raw'
-// import rehypeHighlight from 'rehype-highlight'
+import { Card } from 'antd'
 import { cn } from '@/lib/utils'
 import { HeaderExtra } from './chatboxheader'
 import { ChatDropdown } from './chatdropdown'
 import type { DropdownItem } from './chatdropdown'
 import type { UIMessage } from 'ai'
+import {
+  Message,
+  MessageContent,
+  MessageResponse,
+  MessageActions,
+  MessageAction,
+} from '@/components/ai-elements/message'
+import { Conversation, ConversationContent } from '@/components/ai-elements/conversation'
+import { CheckIcon, CopyIcon, PencilIcon, RefreshCcwIcon } from 'lucide-react'
+import { cardContainerStyles, conversationStyles, messageStyles } from './ui/styles'
+
 export type ChatMessage = UIMessage
 
 interface ChatContainerProps {
@@ -25,53 +36,9 @@ interface ChatContainerProps {
   items: DropdownItem[]
   activeItemId: string
   onSelect: (id: string) => void
+  onRegenerate?: () => void
+  onEditUserMessage?: (message: ChatMessage) => void
 }
-
-function MarkdownRender({ text }: { text: string }) {
-  //return <ReactMarkdown rehypePlugins={[rehypeRaw, rehypeHighlight]}>{text}</ReactMarkdown>
-  return <XMarkdown>{text}</XMarkdown>
-}
-
-const testText = `
-Here's a Python code block example that demonstrates how to calculate Fibonacci numbers:
-
-\`\`\` python
-def fibonacci(n):
-    """
-    Calculate the nth Fibonacci number
-    :param n: The position in the Fibonacci sequence (must be a positive integer)
-    :return: The value at position n
-    """
-    if n <= 0:
-        return 0
-    elif n == 1:
-        return 1
-    else:
-        a, b = 0, 1
-        for _ in range(2, n+1):
-            a, b = b, a + b
-        return b
-
-# Example usage
-if __name__ == "__main__":
-    num = 10
-    print(f"The {num}th Fibonacci number is: {fibonacci(num)}")
-    
-    # Print the first 15 Fibonacci numbers
-    print("First 15 Fibonacci numbers:")
-    for i in range(1, 16):
-        print(fibonacci(i), end=" ")
-\`\`\`
-
-This code includes:
-
-1. A function to compute Fibonacci numbers
-2. Docstring documentation
-3. Example usage in the main block
-4. A loop to print the first 15 numbers
-
-You can modify the parameters or output format as needed. The Fibonacci sequence here starts with fib(1) = 1, fib(2) = 1.
-`
 
 export function ChatContainer({
   messages,
@@ -84,7 +51,21 @@ export function ChatContainer({
   items,
   activeItemId,
   onSelect,
+  onRegenerate,
+  onEditUserMessage,
 }: ChatContainerProps) {
+  const [copiedMessageId, setCopiedMessageId] = React.useState<string | null>(null)
+
+  const handleCopy = async (text: string, messageId: string) => {
+    try {
+      await navigator.clipboard.writeText(text)
+      setCopiedMessageId(messageId)
+      setTimeout(() => setCopiedMessageId(null), 3000)
+    } catch (e) {
+      console.error('Copy failed', e)
+    }
+  }
+
   const headerTitle = (
     <ChatDropdown
       items={items}
@@ -106,93 +87,100 @@ export function ChatContainer({
     return textParts.join('\n\n')
   }
 
-  const getAvatarInfo = (m: ChatMessage): { avatar?: string; name?: string } => {
-    const meta = (m.metadata ?? {}) as { avatar?: string; name?: string }
-    return {
-      avatar: meta.avatar,
-      name: meta.name,
-    }
-  }
-  //console.log('messages', messages)
-  // 将消息转换为 Ant Design X Conversations 需要的格式
-  const conversationItems = React.useMemo(
-    () =>
-      messages.map((m) => {
-        const text = getTextFromMessage(m)
-        const { avatar, name } = getAvatarInfo(m)
-        const isUser = m.role === 'user'
-        const isAssistant = m.role === 'assistant'
-
-        const bubbleContent = (
-          <div className="[&_code]:font-mono [&_code]:text-[0.8125rem] [&_p]:my-1">
-            <MarkdownRender text={text} />
-            <MarkdownRender text={testText} />
-            {/* 预留插件渲染位 */}
-            {/* {m.plugins?.map((p, i) => (
-          <div key={i}>插件：{p.type}</div>
-        ))} */}
-          </div>
-        )
-
-        return {
-          key: m.id,
-          placement: isUser ? ('end' as const) : ('start' as const),
-          avatar: avatar ? (
-            <Avatar src={avatar} size={32}>
-              {name?.[0] || m.role[0].toUpperCase()}
-            </Avatar>
-          ) : undefined,
-          role: m.role,
-          content: bubbleContent,
-          variant: isUser ? ('shadow' as const) : ('borderless' as const),
-          styles: {
-            content: {
-              borderRadius: 28,
-              backgroundColor: isUser ? '#e4e4e7' : 'transparent',
-              boxShadow: isAssistant ? 'none' : undefined,
-              lineHeight: '1.6',
-              padding: '2px 12px',
-              minHeight: '20px',
-              //maxWidth: isUser ? '100%' : '90%',
-            },
-          },
-        }
-      }),
-    [messages],
-  )
-
   return (
     <Card
       title={
-        <div className="inline-block text-[0.7rem] font-semibold leading-5 pb-0.5">
+        <div className="inline-block pb-0.5 text-[0.7rem] font-semibold leading-5">
           {headerTitle}
         </div>
       }
       extra={HeaderExtra(onNewChat, onToggleSidebar, onClose)}
       className={cn(
-        'rounded-2xl overflow-hidden w-full',
-        '[&_.ant-card-head]:min-h-[10px] [&_.ant-card-head]:px-3 [&_.ant-card-head]:py-1 [&_.ant-card-head]:border-b-0',
-        '[&_.ant-card-head-title]:border-b-0 [&_.ant-card-head-title]:leading-5 [&_.ant-card-head-title]:p-0',
-        '[&_.ant-card-body]:flex [&_.ant-card-body]:flex-col [&_.ant-card-body]:px-1 [&_.ant-card-body]:py-0',
+        cardContainerStyles.wrapper,
+        cardContainerStyles.header,
+        cardContainerStyles.headerTitle,
+        cardContainerStyles.body,
         className,
       )}
       styles={{
         body: {
-          //height: typeof height === 'number' ? `${height}px` : height,
-          minHeight: '480px', // 最小高度
-          maxHeight: typeof height === 'number' ? `${height}px` : height, // 最大高度
-          height: 'auto', // 自动高度，根据内容增长
+          minHeight: '480px',
+          maxHeight: typeof height === 'number' ? `${height}px` : height,
+          height: 'auto',
+          display: 'flex',
+          flexDirection: 'column',
+          overflow: 'hidden',
         },
       }}
     >
-      {/* 会话主体 - 使用 Ant Design X 的 Conversations 组件 */}
-      <div className="flex-1 overflow-hidden flex text-[0.6rem] leading-6 font-sans pt-2 pb-1">
-        <Bubble.List
-          items={conversationItems}
-          autoScroll={false}
-          //style={{ overflowY: 'auto', height: '100%' }}
-          className="scrollbar-thumb-only overflow-y-auto"
-        />
+      {/* 会话主体 - 使用 Vercel AI SDK 的 Message 组件 */}
+      <div className={conversationStyles.wrapper}>
+        <Conversation className={conversationStyles.container}>
+          <ConversationContent className={conversationStyles.content}>
+            {messages.map((message, messageIndex) => {
+              const text = getTextFromMessage(message)
+              const isLastMessage = messageIndex === messages.length - 1
+              const isUserMessage = message.role === 'user'
+              const isAssistantMessage = message.role === 'assistant'
+              return (
+                <React.Fragment key={message.id}>
+                  <Message from={message.role} className={cn('group')}>
+                    {isUserMessage && (
+                      <MessageActions className={messageStyles.userActions}>
+                        {/* Copy 按钮 */}
+                        <MessageAction
+                          onClick={() => {
+                            handleCopy(text, message.id)
+                          }}
+                          label={copiedMessageId === message.id ? 'Copied' : 'Copy'}
+                        >
+                          {copiedMessageId === message.id ? <CheckIcon /> : <CopyIcon />}
+                        </MessageAction>
+
+                        {/* Edit 按钮：调用外层回调 */}
+                        <MessageAction onClick={() => onEditUserMessage?.(message)} label="Edit">
+                          <PencilIcon />
+                        </MessageAction>
+                      </MessageActions>
+                    )}
+
+                    <MessageContent>
+                      <MessageResponse>{text}</MessageResponse>
+                    </MessageContent>
+
+                    {/* 显示操作按钮 - 仅对最后一条 assistant 消息 */}
+                    {isAssistantMessage && isLastMessage && (
+                      <MessageActions className={messageStyles.assistantActions}>
+                        {onRegenerate && (
+                          <MessageAction
+                            onClick={() => onRegenerate()}
+                            label="Retry"
+                            //tooltip="Regenerate response"
+                          >
+                            <RefreshCcwIcon className={messageStyles.actionIconHover} />
+                          </MessageAction>
+                        )}
+                        <MessageAction
+                          onClick={() => {
+                            handleCopy(text, message.id)
+                          }}
+                          label={copiedMessageId === message.id ? 'Copied' : 'Copy'}
+                          //tooltip="Copy to clipboard"
+                        >
+                          {copiedMessageId === message.id ? (
+                            <CheckIcon className={messageStyles.actionIconHover} />
+                          ) : (
+                            <CopyIcon className={messageStyles.actionIconHover} />
+                          )}
+                        </MessageAction>
+                      </MessageActions>
+                    )}
+                  </Message>
+                </React.Fragment>
+              )
+            })}
+          </ConversationContent>
+        </Conversation>
       </div>
 
       {/* 底部输入区（来自外部） */}

@@ -41,7 +41,7 @@ export function ChatPopoverLauncher() {
   } as const
 
   return (
-    <div className="pointer-events-none fixed right-6 bottom-[calc(1.5rem+env(safe-area-inset-bottom,0px))] z-[60]">
+    <div className="pointer-events-none fixed right-6 bottom-[calc(1.5rem+env(safe-area-inset-bottom,0px))] z-60">
       <MorphingPopover
         className="relative flex items-end justify-end pointer-events-auto"
         variants={triggerVariants}
@@ -52,7 +52,7 @@ export function ChatPopoverLauncher() {
         </MorphingPopoverTrigger>
 
         <MorphingPopoverContent
-          className="pointer-events-auto absolute right-0 bottom-0 z-[80]
+          className="pointer-events-auto absolute right-0 bottom-0 z-80
                      w-[min(100vw,400px)] origin-bottom-right
                      bg-transparent border-none shadow-none p-0"
         >
@@ -75,6 +75,7 @@ function PopoverBody() {
     sendMessage,
     setMessages,
     stop,
+    regenerate,
   } = useChat<ChatMessage>({
     transport: new DefaultChatTransport({
       api: 'http://localhost:8989/api/chat-round-vercel-stream',
@@ -133,6 +134,7 @@ function PopoverBody() {
         onNewChat={handleNewChat}
         onToggleSidebar={() => {}}
         onClose={close}
+        onRegenerate={regenerate}
       >
         <ActionDock actions={testActions} />
         <ChatInput isLoading={isSending} onSend={handleSend} onStop={handleStop} />

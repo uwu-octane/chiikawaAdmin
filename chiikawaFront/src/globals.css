@@ -1,0 +1,419 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Streamdown styles for MessageResponse component */
+@source "../node_modules/streamdown/dist/index.js";
+
+/* AlibabaSans 字体定义 */
+@font-face {
+  font-family: 'AlibabaSans';
+  font-style: normal;
+  font-weight: 300;
+  font-display: swap;
+  src: url('//mdn.alipayobjects.com/huamei_iwk9zp/afts/file/A*1GSgSYDD_aIAAAAAQsAAAAgAegCCAQ/AlibabaSans-Light.woff2')
+    format('woff2');
+}
+
+@font-face {
+  font-family: 'AlibabaSans';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('//mdn.alipayobjects.com/huamei_iwk9zp/afts/file/A*2zEUQqnPNesAAAAAQtAAAAgAegCCAQ/AlibabaSans-Regular.woff2')
+    format('woff2');
+}
+
+@font-face {
+  font-family: 'AlibabaSans';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('//mdn.alipayobjects.com/huamei_iwk9zp/afts/file/A*E_cxRbMlZqUAAAAAQuAAAAgAegCCAQ/AlibabaSans-Medium.woff2')
+    format('woff2');
+}
+
+@font-face {
+  font-family: 'AlibabaSans';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('//mdn.alipayobjects.com/huamei_iwk9zp/afts/file/A*E_cxRbMlZqUAAAAAQuAAAAgAegCCAQ/AlibabaSans-Bold.woff2')
+    format('woff2');
+}
+
+@font-face {
+  font-family: 'AlibabaSans';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('//mdn.alipayobjects.com/huamei_iwk9zp/afts/file/A*E_cxRbMlZqUAAAAAQuAAAAgAegCCAQ/AlibabaSans-Heavy.woff2')
+    format('woff2');
+}
+
+:root {
+  /* 基础颜色 */
+  --background: 0 0% 100%;
+  --foreground: 0 0% 9%;
+
+  /* 卡片 */
+  --card: 0 0% 100%;
+  --card-foreground: 0 0% 9%;
+
+  /* 弹出框 */
+  --popover: 0 0% 100%;
+  --popover-foreground: 0 0% 9%;
+
+  /* 主色调 */
+  --primary: 0 0% 9%;
+  --primary-foreground: 0 0% 98%;
+
+  /* 次要色调 */
+  --secondary: 0 0% 96%;
+  --secondary-foreground: 0 0% 9%;
+
+  /* 柔和色调 */
+  --muted: 0 0% 96%;
+  --muted-foreground: 0 0% 45%;
+
+  /* 强调色 */
+  --accent: 0 0% 96%;
+  --accent-foreground: 0 0% 9%;
+
+  /* 破坏性操作 */
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 0 0% 98%;
+
+  /* 边框 */
+  --border: 0 0% 90%;
+  --input: 0 0% 90%;
+  --ring: 0 0% 9%;
+
+  /* 圆角 */
+  --radius: 0.5rem;
+
+  color-scheme: light dark;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    /* 基础颜色 */
+    --background: 0 0% 4%;
+    --foreground: 0 0% 93%;
+
+    /* 卡片 */
+    --card: 0 0% 4%;
+    --card-foreground: 0 0% 93%;
+
+    /* 弹出框 */
+    --popover: 0 0% 4%;
+    --popover-foreground: 0 0% 93%;
+
+    /* 主色调 */
+    --primary: 0 0% 98%;
+    --primary-foreground: 0 0% 9%;
+
+    /* 次要色调 */
+    --secondary: 0 0% 15%;
+    --secondary-foreground: 0 0% 98%;
+
+    /* 柔和色调 */
+    --muted: 0 0% 15%;
+    --muted-foreground: 0 0% 64%;
+
+    /* 强调色 */
+    --accent: 0 0% 15%;
+    --accent-foreground: 0 0% 98%;
+
+    /* 破坏性操作 */
+    --destructive: 0 63% 31%;
+    --destructive-foreground: 0 0% 98%;
+
+    /* 边框 */
+    --border: 0 0% 15%;
+    --input: 0 0% 15%;
+    --ring: 0 0% 83%;
+  }
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  max-width: 100vw;
+  overflow-x: hidden;
+  font-family:
+    AlibabaSans,
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    Roboto,
+    'Helvetica Neue',
+    Arial,
+    'Noto Sans',
+    sans-serif,
+    'Apple Color Emoji',
+    'Segoe UI Emoji',
+    'Segoe UI Symbol',
+    'Noto Color Emoji';
+}
+
+body {
+  color: var(--foreground);
+  background: var(--background);
+}
+
+* {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+}
+
+a {
+  color: inherit;
+  font-weight: 500;
+  text-decoration: none;
+}
+
+a:hover {
+  color: #535bf2;
+}
+
+.colorWeak {
+  filter: invert(80%);
+}
+
+.ant-layout {
+  min-height: 100vh;
+}
+
+.ant-pro-sider.ant-layout-sider.ant-pro-sider-fixed {
+  left: unset;
+}
+
+canvas {
+  display: block;
+}
+
+ul,
+ol {
+  list-style: none;
+}
+
+@media (max-width: 768px) {
+  .ant-table {
+    width: 100%;
+    overflow-x: auto;
+  }
+
+  .ant-table-thead > tr > th,
+  .ant-table-thead > tr > td,
+  .ant-table-tbody > tr > th,
+  .ant-table-tbody > tr > td {
+    white-space: pre;
+  }
+
+  .ant-table-thead > tr > th > span,
+  .ant-table-thead > tr > td > span,
+  .ant-table-tbody > tr > th > span,
+  .ant-table-tbody > tr > td > span {
+    display: block;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  html {
+    color-scheme: dark;
+  }
+}
+
+/* 滚动条隐藏 */
+/* 对 WebKit 浏览器隐藏滚动条 */
+.scrollbar-hidden::-webkit-scrollbar,
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* 对 Firefox 隐藏滚动条 */
+.scrollbar-hidden,
+.scrollbar-hide {
+  scrollbar-width: none;
+}
+
+/* 对旧版本 Edge / IE 可以加上 -ms-overflow-style */
+.scrollbar-hidden,
+.scrollbar-hide {
+  -ms-overflow-style: none; /* IE and Edge */
+}
+
+.scrollbar-thumb-only {
+  scrollbar-width: thin; /* 细一点 */
+  scrollbar-color: #b3b3b3 transparent; /* thumb 颜色 + track 透明 */
+}
+
+/* WebKit 系浏览器（Chrome / Edge / Safari） */
+.scrollbar-thumb-only::-webkit-scrollbar {
+  width: 6px; /* 竖向滚动条宽度 */
+  height: 6px; /* 横向滚动条高度 */
+}
+
+/* 轨道：完全透明，没有阴影 */
+.scrollbar-thumb-only::-webkit-scrollbar-track {
+  background: transparent;
+  box-shadow: none;
+  border-radius: 999px;
+}
+
+/* 某些浏览器还有 track-piece，一并置为透明 */
+.scrollbar-thumb-only::-webkit-scrollbar-track-piece {
+  background: transparent;
+}
+
+/* 滚动条滑块：你真正想看到的“thumb” */
+.scrollbar-thumb-only::-webkit-scrollbar-thumb {
+  background-color: #b3b3b3;
+  border-radius: 999px;
+  border: 2px solid transparent; /* 让 thumb 看起来更细一点 */
+  background-clip: padding-box;
+}
+
+/* hover 时稍微加深一点 */
+.scrollbar-thumb-only::-webkit-scrollbar-thumb:hover {
+  background-color: #8c8c8c;
+}
+
+@layer utilities {
+  .no-x-scrollbar {
+    overflow-x: auto;
+    /* Firefox */
+    scrollbar-width: none;
+  }
+
+  .no-x-scrollbar::-webkit-scrollbar {
+    /* Chrome / Safari */
+    height: 0px;
+  }
+}
+
+/* 动画支持 */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fade-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes zoom-in {
+  from {
+    transform: scale(0.95);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+
+@keyframes zoom-out {
+  from {
+    transform: scale(1);
+  }
+  to {
+    transform: scale(0.95);
+  }
+}
+
+@keyframes slide-in-from-top {
+  from {
+    transform: translateY(-2px);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes slide-in-from-bottom {
+  from {
+    transform: translateY(2px);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes slide-in-from-left {
+  from {
+    transform: translateX(-2px);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes slide-in-from-right {
+  from {
+    transform: translateX(2px);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+.animate-in {
+  animation-duration: 150ms;
+  animation-timing-function: ease-out;
+  animation-fill-mode: both;
+}
+
+.animate-out {
+  animation-duration: 150ms;
+  animation-timing-function: ease-in;
+  animation-fill-mode: both;
+}
+
+.fade-in-0 {
+  animation-name: fade-in;
+}
+
+.fade-out-0 {
+  animation-name: fade-out;
+}
+
+.zoom-in-95 {
+  animation-name: zoom-in;
+}
+
+.zoom-out-95 {
+  animation-name: zoom-out;
+}
+
+.slide-in-from-top-2 {
+  animation-name: slide-in-from-top;
+}
+
+.slide-in-from-bottom-2 {
+  animation-name: slide-in-from-bottom;
+}
+
+.slide-in-from-left-2 {
+  animation-name: slide-in-from-left;
+}
+
+.slide-in-from-right-2 {
+  animation-name: slide-in-from-right;
+}

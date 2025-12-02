@@ -1,0 +1,58 @@
+syntax = "proto3";
+
+package conversation;
+
+// 对话角色
+enum ConversationMessageRole {
+  CONVERSATION_MESSAGE_ROLE_UNSPECIFIED = 0;
+  CONVERSATION_MESSAGE_ROLE_SYSTEM = 1;
+  CONVERSATION_MESSAGE_ROLE_USER = 2;
+  CONVERSATION_MESSAGE_ROLE_ASSISTANT = 3;
+  CONVERSATION_MESSAGE_ROLE_TOOL = 4;
+}
+
+// 会话消息
+message ConversationMessage {
+  optional string id = 1;
+  string session_id = 2;
+  ConversationMessageRole role = 3;
+  string content = 4;
+  int32 index = 5;
+  optional string ui_message_id = 6;
+  optional string model_message_snapshot = 7; // JSON string
+  map<string, string> metadata = 8; // JSON string values
+  int64 created_at = 9; // Unix timestamp in milliseconds
+  int64 updated_at = 10; // Unix timestamp in milliseconds
+}
+
+// 会话来源渠道
+enum ConversationChannel {
+  CONVERSATION_CHANNEL_UNSPECIFIED = 0;
+  CONVERSATION_CHANNEL_WEB_CHAT = 1;
+  CONVERSATION_CHANNEL_VOICE = 2;
+  CONVERSATION_CHANNEL_API = 3;
+}
+
+// 会话状态
+enum ConversationStatus {
+  CONVERSATION_STATUS_UNSPECIFIED = 0;
+  CONVERSATION_STATUS_ACTIVE = 1;
+  CONVERSATION_STATUS_ENDED = 2;
+  CONVERSATION_STATUS_ARCHIVED = 3;
+}
+
+// 会话实体
+message ConversationSession {
+  string session_id = 1;
+  optional string user_id = 2;
+  optional string tenant_id = 3;
+  ConversationChannel channel = 4;
+  optional string title = 5;
+  optional bool deleted = 6;
+  int64 started_at = 7; // Unix timestamp in milliseconds
+  int64 last_message_at = 8; // Unix timestamp in milliseconds
+  int64 created_at = 9; // Unix timestamp in milliseconds
+  int64 updated_at = 10; // Unix timestamp in milliseconds
+  map<string, string> metadata = 11; // JSON string values
+}
+

@@ -1,3 +1,4 @@
+import '@/trace/tracing'
 import { Context, Next } from 'hono'
 import { context as otelContext, trace } from '@opentelemetry/api'
 import baseLogger from '@/logger/logger'
@@ -70,8 +71,16 @@ export async function observabilityMiddleware(c: Context, next: Next) {
   const duration = Date.now() - start
   const status = c.res.status
 
-  // 出站日志（跳过健康检查）
-  if (!isHealthCheck) {
+  // 检查是否是流式响应（SSE 或流式内容）
+  const contentType = c.res.headers.get('content-type') || ''
+  const isStreamingResponse =
+    contentType.includes('text/event-stream') ||
+    contentType.includes('application/stream+json') ||
+    c.res.body instanceof ReadableStream
+
+  // 出站日志（跳过健康检查和流式响应）
+  // 流式响应会在流结束时由其他机制记录，这里只记录初始响应
+  if (!isHealthCheck && !isStreamingResponse) {
     const logPayload = {
       method,
       path,
@@ -91,27 +100,35 @@ export async function observabilityMiddleware(c: Context, next: Next) {
     } else {
       logger.info('← HTTP response', logPayload)
     }
-
-    // 发送到 OpenTelemetry
-    const otelLogger = logs.getLogger('http')
-    otelLogger.emit({
-      severityNumber: mapTslogLevel(status),
-      body: `← HTTP response: ${method} ${path} ${status} ${duration}ms`,
-      attributes: {
-        'http.method': method,
-        'http.target': path,
-        'http.status_code': status,
-        'http.request_id': requestId,
-        'http.user_agent': userAgent,
-        'http.client_ip': ip,
-        'http.response_time_ms': duration,
-        'service.name': config.consul.serviceName,
-        trace_id: traceId,
-        span_id: spanId,
-      },
+  } else if (isStreamingResponse) {
+    // 流式响应只记录开始，不记录结束（避免在流进行中关闭连接）
+    logger.info('→ HTTP streaming response started', {
+      method,
+      path,
+      status,
+      requestId,
+      traceId,
+      spanId,
     })
   }
-
+  // 发送到 OpenTelemetry
+  const otelLogger = logs.getLogger('http')
+  otelLogger.emit({
+    severityNumber: mapTslogLevel(status),
+    body: `← HTTP response: ${method} ${path} ${status} ${duration}ms`,
+    attributes: {
+      'http.method': method,
+      'http.target': path,
+      'http.status_code': status,
+      'http.request_id': requestId,
+      'http.user_agent': userAgent,
+      'http.client_ip': ip,
+      'http.response_time_ms': duration,
+      'service.name': config.consul.serviceName,
+      trace_id: traceId,
+      span_id: spanId,
+    },
+  })
   if (span) {
     span.setAttribute('http.server_duration_ms', duration)
   }

@@ -37,11 +37,26 @@ app.use(
 
 app.route('/', api)
 
+// 包装 fetch 函数，为流式响应设置更长的超时时间
+const wrappedFetch = async (request: Request, server: Bun.Server<unknown>) => {
+  // 对于流式响应（chat 和 debug 路由），设置无超时限制
+  const url = new URL(request.url)
+  if (
+    (url.pathname.includes('/chat') || url.pathname.includes('/chat-debug')) &&
+    (request.method === 'POST' || request.method === 'GET')
+  ) {
+    server.timeout(request, 0) // 0 表示无超时限制
+  }
+  return app.fetch(request)
+}
+
 const server = Bun.serve({
   port: config.app.port,
   hostname: config.app.host,
-  fetch: app.fetch,
+  fetch: wrappedFetch,
   development: config.app.mode === 'DEV',
+  // 设置空闲超时时间，最大值为 255 秒
+  idleTimeout: config.app.idleTimeout,
 })
 
 console.log(`Server is running on ${server.hostname}:${server.port}`)

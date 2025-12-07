@@ -13,16 +13,24 @@ enum ConversationMessageRole {
 
 // 会话消息
 message ConversationMessage {
-  optional string id = 1;
+  // 消息 ID
+  string id = 1;
+
+  // 会话 ID
   string session_id = 2;
-  ConversationMessageRole role = 3;
-  string content = 4;
-  int32 index = 5;
-  optional string ui_message_id = 6;
-  optional string model_message_snapshot = 7; // JSON string
-  map<string, string> metadata = 8; // JSON string values
-  int64 created_at = 9; // Unix timestamp in milliseconds
-  int64 updated_at = 10; // Unix timestamp in milliseconds
+
+  // 在会话中的顺序索引
+  int32 index = 3;
+
+  // 完整 UIMessage 的 JSON 序列化
+  string ui_message_json = 4;
+
+  // 创建 / 更新时间（毫秒时间戳）
+  int64 created_at = 5;
+  int64 updated_at = 6;
+
+  // 可选的额外元数据（
+  map<string, string> metadata = 7;
 }
 
 // 会话来源渠道

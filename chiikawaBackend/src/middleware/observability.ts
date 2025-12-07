@@ -33,7 +33,6 @@ export async function observabilityMiddleware(c: Context, next: Next) {
   const spanContext = span?.spanContext()
   const traceId = spanContext?.traceId ?? 'unknown'
   const spanId = spanContext?.spanId ?? 'unknown'
-
   // 自定义属性
   if (span) {
     span.setAttribute('http.request_id', requestId)

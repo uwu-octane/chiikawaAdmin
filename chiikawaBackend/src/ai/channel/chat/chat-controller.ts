@@ -15,31 +15,34 @@ function extractTextFromUIMessage(msg: UIMessage): { text: string; uiMessageId?:
   return { text, uiMessageId: msg.id }
 }
 
-function mapConversationMessagesToModelMessages(
-  convMessages: ConversationMessage[],
-): ModelMessage[] {
-  return convMessages.map<ModelMessage>((m) => {
-    // 根据 role 创建正确类型的 ModelMessage
-    switch (m.role) {
-      case 'system':
-        return { role: 'system', content: m.content }
-      case 'user':
-        return { role: 'user', content: m.content }
-      case 'assistant':
-        return { role: 'assistant', content: m.content }
-      case 'tool':
-        return { role: 'assistant', content: m.content }
-    }
-    // fallback
-    return { role: 'user', content: m.content }
-  })
-}
+// function mapConversationMessagesToModelMessages(
+//   convMessages: ConversationMessage[],
+// ): ModelMessage[] {
+//   return convMessages.map<ModelMessage>((m) => {
+//     // 根据 role 创建正确类型的 ModelMessage
+//     switch (m.role) {
+//       case 'system':
+//         return { role: 'system', content: m.content }
+//       case 'user':
+//         return { role: 'user', content: m.content }
+//       case 'assistant':
+//         return { role: 'assistant', content: m.content }
+//       case 'tool':
+//         return { role: 'assistant', content: m.content }
+//     }
+//     // fallback
+//     return { role: 'user', content: m.content }
+//   })
+// }
 export const chatController = {
   async handleChatRequest(body: ChatRequestBody): Promise<Response> {
     const sessionId = body.id
     const uiMessage: UIMessage = body.message
-    let session: ConversationSession | null = await sessionStore.getById(sessionId)
+    log.debug({ uiMessageParts: uiMessage.parts }, 'received uiMessage')
     const now = new Date()
+
+    //* upsert session
+    let session: ConversationSession | null = await sessionStore.getById(sessionId)
     if (!session) {
       session = {
         sessionId: sessionId,
@@ -56,30 +59,31 @@ export const chatController = {
         updatedAt: now,
       }
     }
-
     await sessionStore.upsert(session)
 
+    //* list history messages and sort
     const historyMessages: ConversationMessage[] = await messageStore.listBySessionId(sessionId)
-    const historyModelMessages: ModelMessage[] =
-      mapConversationMessagesToModelMessages(historyMessages)
-    const { text: userText, uiMessageId } = extractTextFromUIMessage(uiMessage)
+    historyMessages.sort((a, b) => a.index - b.index)
+
+    const historyUiMessages: UIMessage[] = historyMessages.map((m) => m.message)
+    const { text: userText } = extractTextFromUIMessage(uiMessage)
     if (!userText || !userText.trim()) {
       throw new Error('Empty user message content')
     }
 
     const nextIndex = historyMessages.length
-
+    //* append user message
     const userConvMessage: ConversationMessage = {
       id: `msg_${sessionId}_${nextIndex}`,
-      sessionId: sessionId,
-      role: 'user',
-      content: userText,
+      sessionId,
       index: nextIndex,
-      uiMessageId,
+      message: uiMessage,
       createdAt: now,
       updatedAt: now,
     }
     await messageStore.append(userConvMessage)
+
+    const historyModelMessages: ModelMessage[] = convertToModelMessages(historyUiMessages)
     const [userModelMessage] = convertToModelMessages([uiMessage])
 
     const modelMessages: ModelMessage[] = [...historyModelMessages, userModelMessage]
@@ -93,36 +97,30 @@ export const chatController = {
     //stream.consumeStream()
     return stream.toUIMessageStreamResponse({
       onFinish: async ({ responseMessage, isAborted }) => {
-        try {
-          log.info('onFinish')
-          if (isAborted) {
-            log.info('isAborted')
-            return
-          }
-          if (!responseMessage || responseMessage.role !== 'assistant') {
-            log.info('responseMessage is not assistant')
-            return
-          }
-          const { text: assistantText } = extractTextFromUIMessage(responseMessage)
-          if (!assistantText.trim()) {
-            log.info('assistantText is empty')
-            return
-          }
-          const assistantConvMessage: ConversationMessage = {
-            id: `msg_${sessionId}_${assistantIndex}`,
-            sessionId,
-            role: 'assistant',
-            content: assistantText,
-            index: assistantIndex,
-            uiMessageId: responseMessage.id,
-            createdAt: now,
-            updatedAt: now,
-          }
-          await messageStore.append(assistantConvMessage)
-        } catch (error) {
-          log.error({ error }, 'error in onFinish')
+        log.debug('onFinish')
+        if (isAborted) {
+          log.debug('isAborted')
           return
         }
+        if (!responseMessage || responseMessage.role !== 'assistant') {
+          log.error('responseMessage is not assistant')
+          return
+        }
+        const { text: assistantText } = extractTextFromUIMessage(responseMessage)
+        if (!assistantText.trim()) {
+          log.error('assistantText is empty')
+          return
+        }
+        const nowFinish = new Date()
+        const assistantConvMessage: ConversationMessage = {
+          id: `msg_${sessionId}_${assistantIndex}`,
+          sessionId,
+          index: assistantIndex,
+          message: responseMessage,
+          createdAt: nowFinish,
+          updatedAt: nowFinish,
+        }
+        await messageStore.append(assistantConvMessage)
       },
       onError: (error: unknown): string => {
         log.error({ error }, 'streamText error')

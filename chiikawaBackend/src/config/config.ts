@@ -26,6 +26,7 @@ export const config = {
   otel: {
     traceUrl: env.OTEL_TRACE_URL || 'http://localhost:4318/v1/traces',
     logUrl: env.OTEL_LOG_URL || 'http://localhost:4318/v1/logs',
+    endpoint: env.OTEL_EXPORTER_OTLP_ENDPOINT || 'http://localhost:4318',
   },
   redis: {
     // Redis 官方 client 只接受 redis:// 或 rediss:// 协议

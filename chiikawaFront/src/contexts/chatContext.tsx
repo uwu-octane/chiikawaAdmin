@@ -41,9 +41,6 @@ function createChat(sessionId: string) {
             id: id ?? sessionId,
             message: last,
           },
-          headers: {
-            'Content-Type': 'text/event-stream ',
-          },
         }
       },
     }),

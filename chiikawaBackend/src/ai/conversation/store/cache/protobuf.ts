@@ -2,6 +2,7 @@ import { join } from 'path'
 import { loadSync, type Root } from 'protobufjs'
 import type { ConversationMessage } from '../schema/message'
 import type { ConversationSession } from '../schema/session'
+import type { UIMessage } from 'ai'
 
 // 加载 proto 文件
 const protoPath = join(process.cwd(), 'proto', 'conversation.proto')
@@ -56,25 +57,14 @@ function metadataFromProto(proto: Record<string, string> | undefined): Record<st
  */
 export function serializeMessage(message: ConversationMessage): Buffer {
   const payload = {
+    // 注意：protobufjs 会自动把 camelCase 映射到 proto 的 snake_case
     id: message.id,
     sessionId: message.sessionId,
-    role:
-      message.role === 'system'
-        ? 1
-        : message.role === 'user'
-          ? 2
-          : message.role === 'assistant'
-            ? 3
-            : 4,
-    content: message.content,
     index: message.index,
-    uiMessageId: message.uiMessageId,
-    modelMessageSnapshot: message.modelMessageSnapshot
-      ? JSON.stringify(message.modelMessageSnapshot)
-      : undefined,
-    metadata: metadataToProto(message.metadata),
+    uiMessageJson: JSON.stringify(message.message as UIMessage),
     createdAt: dateToTimestamp(message.createdAt),
     updatedAt: dateToTimestamp(message.updatedAt),
+    //metadata
   }
 
   const errMsg = ConversationMessageType.verify(payload)
@@ -101,26 +91,17 @@ export function deserializeMessage(buffer: Buffer): ConversationMessage {
     oneofs: true,
   })
 
-  const roleMap: Record<number, ConversationMessage['role']> = {
-    1: 'system',
-    2: 'user',
-    3: 'assistant',
-    4: 'tool',
-  }
+  // 还原 UIMessage
+  const uiMessage = JSON.parse(obj.uiMessageJson as string) as UIMessage
 
   return {
-    id: obj.id,
-    sessionId: obj.sessionId,
-    role: (roleMap[obj.role as number] || 'user') as ConversationMessage['role'],
-    content: obj.content,
-    index: obj.index,
-    uiMessageId: obj.uiMessageId,
-    modelMessageSnapshot: obj.modelMessageSnapshot
-      ? (JSON.parse(obj.modelMessageSnapshot) as ConversationMessage['modelMessageSnapshot'])
-      : undefined,
-    metadata: metadataFromProto(obj.metadata),
+    id: obj.id as string,
+    sessionId: obj.sessionId as string,
+    index: obj.index as number,
+    message: uiMessage,
     createdAt: timestampToDate(obj.createdAt as number),
     updatedAt: timestampToDate(obj.updatedAt as number),
+    // 如果你在 proto 里保留了 metadata 字段，可以在 TS ConversationMessage 加 metadata 再转回来
   }
 }
 

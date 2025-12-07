@@ -16,6 +16,7 @@
     "@opentelemetry/sdk-logs": "^0.208.0",
     "@opentelemetry/sdk-node": "^0.208.0",
     "@opentelemetry/semantic-conventions": "^1.38.0",
+    "@typescript/native-preview": "^7.0.0-dev.20251206.1",
     "ai": "^6.0.0-beta.124",
     "consul": "^2.0.1",
     "hono": "^4.10.4",
@@ -27,6 +28,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.36.0",
+    "@opentelemetry/instrumentation-http": "^0.208.0",
     "@types/bun": "latest",
     "@types/protobufjs": "^6.0.0",
     "eslint": "^9.36.0",

@@ -29,6 +29,7 @@ const sdk = new NodeSDK({
   resource,
   traceExporter,
   logRecordProcessor: new BatchLogRecordProcessor(logExporter),
+  //   instrumentations: [new HttpInstrumentation()],
 })
 
 try {

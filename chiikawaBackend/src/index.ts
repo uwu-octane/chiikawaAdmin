@@ -53,6 +53,7 @@ const wrappedFetch = async (request: Request, server: Bun.Server<unknown>) => {
 const server = Bun.serve({
   port: config.app.port,
   hostname: config.app.host,
+  // fetch: app.fetch,
   fetch: wrappedFetch,
   development: config.app.mode === 'DEV',
   // 设置空闲超时时间，最大值为 255 秒

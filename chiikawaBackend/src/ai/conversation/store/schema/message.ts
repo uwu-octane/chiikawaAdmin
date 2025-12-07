@@ -6,8 +6,8 @@ export const ConversationMessageSchema = z.object({
   sessionId: z.string(),
   index: z.number().int().nonnegative(),
   message: z.custom<UIMessage>(),
-  createdAt: z.date(),
-  updatedAt: z.date(),
+  createdAt: z.date().optional(),
+  updatedAt: z.date().optional(),
 })
 
 export type ConversationMessage = z.infer<typeof ConversationMessageSchema>
@@ -42,4 +42,10 @@ export type MessageStore = {
    * 按会话列出所有消息（开发阶段用，后面可以加分页）
    */
   listBySessionId(sessionId: string): Promise<ConversationMessage[]>
+}
+
+export type PersistentMessageStore = MessageStore
+
+export type CacheMessageStore = MessageStore & {
+  clearSession?(sessionId: string): Promise<void>
 }

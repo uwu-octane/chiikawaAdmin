@@ -41,9 +41,9 @@ export const ConversationSessionSchema = z.object({
   /** 最后一条消息时间（user 或 assistant） */
   lastMessageAt: z.date(),
   /** 创建时间（记录写入 DB 的时间） */
-  createdAt: z.date(),
+  createdAt: z.date().optional(),
   /** 更新时间（最后一次持久化变更的时间） */
-  updatedAt: z.date(),
+  updatedAt: z.date().optional(),
   /** 方便扩展的元数据，比如客户标签 / 渠道具体信息等 */
   metadata: z.record(z.string(), z.unknown()).optional(),
 })

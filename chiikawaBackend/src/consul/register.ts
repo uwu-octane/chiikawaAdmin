@@ -58,3 +58,8 @@ export async function unregister() {
     }
   }
 }
+
+process.on('SIGINT', async () => {
+  await unregister()
+  process.exit(0)
+})

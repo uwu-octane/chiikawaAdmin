@@ -4,7 +4,7 @@ import { every } from 'hono/combine'
 import { httpInstrumentationMiddleware } from '@hono/otel'
 import api from './server/routes'
 import config from '@/config/config'
-import { register, unregister } from './consul/register'
+import { register } from './consul/register'
 import baseLogger from './logger/logger'
 import { observabilityMiddleware } from './middleware/observability'
 import { cors } from 'hono/cors'
@@ -62,22 +62,5 @@ const server = Bun.serve({
 
 console.log(`Server is running on ${server.hostname}:${server.port}`)
 register()
-
-process.on('SIGINT', async () => {
-  console.log('Shutting down gracefully...')
-  try {
-    await Promise.all([
-      unregister().catch((err) => {
-        console.warn('Error during Consul unregister:', err)
-      }),
-      // 给 tracing shutdown 一些时间，但它有自己的超时处理
-      new Promise((resolve) => setTimeout(resolve, 100)),
-    ])
-  } catch (error) {
-    console.error('Error during shutdown:', error)
-  } finally {
-    process.exit(0)
-  }
-})
 
 export default app

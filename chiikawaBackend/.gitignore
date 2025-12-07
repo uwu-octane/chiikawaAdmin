@@ -30,3 +30,5 @@ dist-ssr
 openapi.json
 .env
 .env.*
+/generated/prisma
+src/db/generated/prisma

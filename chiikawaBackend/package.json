@@ -16,6 +16,7 @@
     "@opentelemetry/sdk-logs": "^0.208.0",
     "@opentelemetry/sdk-node": "^0.208.0",
     "@opentelemetry/semantic-conventions": "^1.38.0",
+    "@prisma/adapter-pg": "^7.1.0",
     "@prisma/client": "^7.1.0",
     "@typescript/native-preview": "^7.0.0-dev.20251206.1",
     "ai": "^6.0.0-beta.124",
@@ -23,6 +24,7 @@
     "hono": "^4.10.4",
     "pino": "^10.1.0",
     "pino-opentelemetry-transport": "^1.1.0",
+    "postgres": "^3.4.7",
     "protobufjs": "^7.5.4",
     "tslog": "^4.10.2",
     "zod": "^4.1.13"

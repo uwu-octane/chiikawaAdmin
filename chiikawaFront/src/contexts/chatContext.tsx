@@ -37,6 +37,8 @@ function createChat(sessionId: string) {
         const { id, messages } = options as { id?: string; messages: ChatMessage[] }
         const last = messages[messages.length - 1]
         return {
+          //* vercel 的transport 会自动设置 headers,
+          //* 如果覆盖掉会导致后端无法正常解析 stream效果会出问题
           body: {
             id: id ?? sessionId,
             message: last,

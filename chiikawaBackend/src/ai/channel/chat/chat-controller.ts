@@ -1,9 +1,9 @@
 import { ChatRequestBody } from './chat-mapper'
 import { convertToModelMessages, type ModelMessage, type UIMessage } from 'ai'
 import { llmClient } from '@/ai/llm/client'
-import type { ConversationSession } from '@/ai/conversation/store/schema/session'
-import { getConversationRepository } from '@/ai/conversation/store/repo/repo'
-import type { ConversationMessage } from '@/ai/conversation/store/schema/message'
+import type { ConversationSession } from '@/store/schema/conversation/session'
+import { getConversationRepository } from '@/store/repository/conversation/repo'
+import type { ConversationMessage } from '@/store/schema/conversation/message'
 import { baseLogger } from '@/logger/logger'
 const conversationRepository = await getConversationRepository()
 const { sessions: sessionStore, messages: messageStore } = conversationRepository
@@ -15,25 +15,6 @@ function extractTextFromUIMessage(msg: UIMessage): { text: string; uiMessageId?:
   return { text, uiMessageId: msg.id }
 }
 
-// function mapConversationMessagesToModelMessages(
-//   convMessages: ConversationMessage[],
-// ): ModelMessage[] {
-//   return convMessages.map<ModelMessage>((m) => {
-//     // 根据 role 创建正确类型的 ModelMessage
-//     switch (m.role) {
-//       case 'system':
-//         return { role: 'system', content: m.content }
-//       case 'user':
-//         return { role: 'user', content: m.content }
-//       case 'assistant':
-//         return { role: 'assistant', content: m.content }
-//       case 'tool':
-//         return { role: 'assistant', content: m.content }
-//     }
-//     // fallback
-//     return { role: 'user', content: m.content }
-//   })
-// }
 export const chatController = {
   async handleChatRequest(body: ChatRequestBody): Promise<Response> {
     const sessionId = body.id
@@ -46,7 +27,7 @@ export const chatController = {
     if (!session) {
       session = {
         sessionId: sessionId,
-        channel: 'web-chat',
+        channel: 'web-chat' as const,
         startedAt: now,
         lastMessageAt: now,
         createdAt: now,

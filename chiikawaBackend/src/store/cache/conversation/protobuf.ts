@@ -167,4 +167,3 @@ export function deserializeSession(buffer: Buffer): ConversationSession {
     metadata: metadataFromProto(obj.metadata),
   }
 }
-

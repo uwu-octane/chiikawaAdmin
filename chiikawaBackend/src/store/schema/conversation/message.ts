@@ -49,4 +49,3 @@ export type PersistentMessageStore = MessageStore
 export type CacheMessageStore = MessageStore & {
   clearSession?(sessionId: string): Promise<void>
 }
-

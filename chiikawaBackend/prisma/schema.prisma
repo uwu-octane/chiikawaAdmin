@@ -1,6 +1,8 @@
 generator client {
-  provider = "prisma-client"
-  output   = "../src/db/generated/prisma"
+  provider   = "prisma-client"
+  output     = "../src/db/generated/prisma"
+  engineType = "client"
+  runtime    = "bun"
 }
 
 datasource db {
@@ -35,7 +37,7 @@ model conversation_sessions {
   session_id            String                  @id
   user_id               String?
   tenant_id             String?
-  channel               conversation_channel
+  channel               String
   title                 String?
   deleted               Boolean                 @default(false)
   started_at            DateTime                @db.Timestamptz(6)
@@ -65,10 +67,4 @@ model users {
   avatar_url   String?             @db.VarChar(256)
   created_at   DateTime            @default(now()) @db.Timestamptz(6)
   updated_at   DateTime            @default(now()) @db.Timestamptz(6)
-}
-
-enum conversation_channel {
-  web_chat @map("web-chat")
-  voice
-  api
 }

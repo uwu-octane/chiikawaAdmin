@@ -18,7 +18,6 @@ export const config = {
     consulRegisterHost: consulRegisterHost,
     apiBase: env.API_BASE || '/chiikawa/api',
     mode: env.MODE || 'DEV',
-    testKey: env.TEST_KEY,
     // HTTP 请求空闲超时时间（秒），最大 255 秒，默认 255 秒
     // 注意：Bun.serve 的 idleTimeout 最大值为 255 秒
     idleTimeout: env.APP_IDLE_TIMEOUT ? Math.min(255, Number(env.APP_IDLE_TIMEOUT)) : 255,
@@ -35,6 +34,12 @@ export const config = {
   },
   vercel: {
     gatewayKey: env.VERCEL_AI_GATEWAY,
+  },
+  qwen: {
+    wsUrl: env.QWEN_REALTIME_BASE_URL,
+    apiKey: env.QWEN_KEY,
+    asrModel: env.QWEN_ASR_MODEL,
+    ttsModel: env.QWEN_TTS_MODEL,
   },
 }
 export default config

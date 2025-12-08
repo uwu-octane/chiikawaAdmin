@@ -45,9 +45,6 @@ export const llmClient = {
     }
 
     log.info({ logicalModelId, maxOutputTokens }, 'streamChatRaw')
-    // const deepseek = createDeepSeek({
-    //   apiKey: config.app.testKey,
-    // })
 
     return streamText({
       model: cfg.modelId,

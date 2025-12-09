@@ -1,33 +1,29 @@
 import '@/ai/llm/provider'
 import { streamText, type ModelMessage, generateText } from 'ai'
-import { z } from 'zod'
-import { getModelConfig, LogicalModelIdSchema } from './model'
+import { getModelConfig, type LogicalModelId } from './model'
 import { baseLogger } from '@/logger/logger'
 
 const log = baseLogger.getSubLogger({ name: 'llmClient' })
-/**
- * StreamChatParams 的 Zod Schema & 类型
- */
-export const StreamChatParamsSchema = z.object({
-  logicalModelId: LogicalModelIdSchema,
-  messages: z.array(z.custom<ModelMessage>()),
-  maxOutputTokens: z.number().int().positive().optional(),
-  metadata: z.record(z.string(), z.unknown()).optional(),
-})
-
-export type StreamChatParams = z.infer<typeof StreamChatParamsSchema>
 
 /**
- * RunChatOnceParams 的 Zod Schema & 类型
+ * StreamChatParams 类型
  */
-export const RunChatOnceParamsSchema = z.object({
-  logicalModelId: LogicalModelIdSchema,
-  messages: z.array(z.custom<ModelMessage>()),
-  maxOutputTokens: z.number().int().positive().optional(),
-  metadata: z.record(z.string(), z.unknown()).optional(),
-})
+export type StreamChatParams = {
+  logicalModelId: LogicalModelId
+  messages: ModelMessage[]
+  maxOutputTokens?: number
+  metadata?: Record<string, unknown>
+}
 
-export type RunChatOnceParams = z.infer<typeof RunChatOnceParamsSchema>
+/**
+ * RunChatOnceParams 类型
+ */
+export type RunChatOnceParams = {
+  logicalModelId: LogicalModelId
+  messages: ModelMessage[]
+  maxOutputTokens?: number
+  metadata?: Record<string, unknown>
+}
 
 export type StreamChatResult = ReturnType<typeof streamText>
 
@@ -44,7 +40,7 @@ export const llmClient = {
       throw new Error(`Provider ${cfg.provider} not implemented in streamChatRaw`)
     }
 
-    log.info({ logicalModelId, maxOutputTokens }, 'streamChatRaw')
+    //log.info({ logicalModelId, maxOutputTokens }, 'streamChatRaw')
 
     return streamText({
       model: cfg.modelId,

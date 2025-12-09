@@ -6,7 +6,7 @@ import type { ModelMessage } from 'ai'
 import { createQwenTtsSession } from '../tts/client'
 
 async function main() {
-  console.log('[MIC-ASR] starting microphone transcription demo...')
+  console.log('[STT] Initializing microphone transcription system...')
 
   const messages: ModelMessage[] = [
     {
@@ -19,17 +19,18 @@ async function main() {
   let turnIndex = 0
   let canTalk = false
 
+  console.log('[TTS] Initializing text-to-speech session...')
   const ttsSession = await createQwenTtsSession({
     voice: 'Cherry',
   })
+  console.log('[TTS] Session ready')
 
   setupPushToTalkKey(() => {
     canTalk = true
-    console.log(
-      '\n[PTT] Listening... (this round of recognition will automatically stop after speaking)',
-    )
+    console.log('[PTT] Listening... (recognition will stop automatically after speaking)')
   })
-  // Create a WebSocket session to Qwen-ASR
+
+  console.log('[ASR] Creating Qwen ASR session...')
   const session = await createQwenAsrSession(
     {
       sampleRate: 16000,
@@ -38,65 +39,68 @@ async function main() {
     },
     {
       onReady: () => {
-        console.log('[MIC-ASR] Qwen session ready, press spacebar to start speaking')
+        console.log('[ASR] Session ready')
+        console.log('[PTT] Press spacebar to start speaking')
       },
       onPartial: (text) => {
-        // streaming partial results
-        process.stdout.write(`\r[partial] ${text}       `)
+        process.stdout.write(`\r[ASR] Partial: ${text.padEnd(50)}`)
       },
-      onFinal:
-        // final result of each round according to VAD
-        async (text) => {
-          if (!text.trim()) return
+      onFinal: async (text) => {
+        if (!text.trim()) return
 
-          canTalk = false
-          console.log('\n[PTT] press spacebar to start speaking')
+        canTalk = false
+        process.stdout.write('\r' + ' '.repeat(60) + '\r')
 
-          turnIndex++
-          console.log(`\n[User ${turnIndex}] ${text}`)
+        turnIndex++
+        console.log(`[Turn ${turnIndex}] User: ${text}`)
 
-          messages.push({
-            role: 'user',
-            content: text,
+        messages.push({
+          role: 'user',
+          content: text,
+        })
+
+        if (isStreaming) {
+          console.log('[LLM] Waiting for previous response to complete...')
+          return
+        }
+
+        isStreaming = true
+        try {
+          console.log('[LLM] Processing request...')
+          const result = await llmClient.streamChatRaw({
+            logicalModelId: 'fast-chat' as const,
+            messages: messages,
           })
-
-          if (isStreaming) {
-            console.log('waiting for the previous turn to finish...')
-            return
+          process.stdout.write(`[Turn ${turnIndex}] Assistant: `)
+          let fullText = ''
+          for await (const textPart of result.textStream) {
+            process.stdout.write(textPart)
+            fullText += textPart
+            ttsSession.appendText(textPart)
           }
-          isStreaming = true
-          try {
-            const result = await llmClient.streamChatRaw({
-              logicalModelId: 'fast-chat' as const,
-              messages: messages,
-            })
-            process.stdout.write(`[ASSISTANT ${turnIndex}] `)
-            let fullText = ''
-            for await (const textPart of result.textStream) {
-              process.stdout.write(textPart)
-              fullText += textPart
-              ttsSession.appendText(textPart)
-            }
-            console.log('\n')
-            messages.push({
-              role: 'assistant',
-              content: fullText,
-            })
-            ttsSession.commit()
-          } catch (err) {
-            console.error('[MIC-ASR] error:', err)
-          } finally {
-            isStreaming = false
-          }
-        },
+          console.log('')
+          messages.push({
+            role: 'assistant',
+            content: fullText,
+          })
+          ttsSession.commit()
+          console.log('[TTS] Response queued for playback')
+          console.log('[PTT] Press spacebar to continue')
+        } catch (err) {
+          console.error('[LLM] Error:', err)
+        } finally {
+          isStreaming = false
+        }
+      },
       onError: (err) => {
-        console.error('\n[MIC-ASR] ASR error:', err)
+        console.error('[ASR] Error:', err)
       },
       onClose: (code, reason) => {
-        console.log(`\n[MIC-ASR] Qwen session closed: code=${code}, reason=${reason}`)
+        console.log(`[ASR] Session closed: code=${code}, reason=${reason}`)
       },
     },
   )
+  console.log('[MIC] Starting microphone recording...')
   const rec = record.record({
     sampleRate: 16000,
     channels: 1,
@@ -110,31 +114,31 @@ async function main() {
 
   micStream.on('data', (chunk: Buffer) => {
     if (!canTalk) return
-    // Send each chunk of microphone data to Qwen-ASR
     const buf = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk, 'binary')
     session.sendAudio(buf)
   })
 
   micStream.on('error', (err) => {
-    console.error('\n[MIC-ASR] microphone stream error:', err)
+    console.error('[MIC] Stream error:', err)
     session.close(1011, 'mic error')
   })
 
   micStream.on('end', () => {
-    console.log('\n[MIC-ASR] microphone stream ended')
+    console.log('[MIC] Stream ended')
     session.close(1000, 'mic end')
   })
 
   process.on('SIGINT', () => {
-    console.log('\n[MIC-ASR] received SIGINT, stopping recording and closing session...')
+    console.log('\n[STT] Shutting down...')
     try {
       rec.stop()
+      console.log('[MIC] Recording stopped')
     } catch (e) {
-      console.error('[MIC-ASR] stop recorder error:', e)
+      console.error('[MIC] Stop recorder error:', e)
     }
     session.close(1000, 'SIGINT')
     ttsSession.close()
-    // wait for the logs to be printed
+    console.log('[STT] Cleanup complete')
     setTimeout(() => process.exit(0), 500)
   })
 }
@@ -147,12 +151,10 @@ function setupPushToTalkKey(onStartTalk: () => void) {
   stdin.on('data', (key: string) => {
     // Ctrl+C
     if (key === '\u0003') {
-      // 手动触发 SIGINT，让上面的 cleanupAndExit 跑
       process.kill(process.pid, 'SIGINT')
       return
     }
 
-    // 空格键：开始一轮说话
     if (key === ' ') {
       onStartTalk()
       return
@@ -160,6 +162,6 @@ function setupPushToTalkKey(onStartTalk: () => void) {
   })
 }
 main().catch((err) => {
-  console.error('[MIC-ASR] fatal error:', err)
+  console.error('[STT] Fatal error:', err)
   process.exit(1)
 })

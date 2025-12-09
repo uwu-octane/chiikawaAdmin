@@ -1,0 +1,64 @@
+{
+    "general": [
+        {
+            "id": "general_001",
+            "question": "Wer sind die Gründer der Agentur Philipp?",
+            "answer": "Philipp Mann, ein gebürtiger Dingolfinger, ist KI und Digital - Fachmann und direkter Ansprechpartner für die Kunden. Er gründete 2019 seine erste KI-Firma \"TailorWine\". Dort lernte er Philipp Niestroj kennen, einen studierten Elektroingenieur, der als Technik-Chef fungiert. \"KI made in Bavaria – unser Anspruch ist die perfekte Kombination aus Innovation und Tradition\", erklärt Mann. \"Mit PHILIPP wollen wir die digitale Transformation für Unternehmen so einfach und erfolgreich wie möglich gestalten.\""
+        },
+        {
+            "id": "general_002",
+            "question": "Wo sitzt die Agentur Philipp und was macht sie genau?",
+            "answer": "Die prämierte Agentur PHILIPP hat ihren Sitz im Ausbildungszentrum Gillig in Dingolfing und bietet Expertise in drei Kernbereichen:\n\n• Web- & App-Entwicklung: Entwicklung moderner Apps und Webseiten, die auf allen Geräten optimal funktionieren.\n\n• Künstliche Intelligenz (KI): Wettbewerbsvorteile durch den gezielten Einsatz von Künstlicher Intelligenz.\n\n• Digitalisierung & Automatisierung: Effizienzsteigerung und Kostensenkung durch die Digitalisierung wiederkehrender Aufgaben."
+        },
+        {
+            "id": "general_003",
+            "question": "In welchen Bereichen macht der Einsatz von KI Sinn?",
+            "answer": "Ein Beispiel für den Einsatz von KI ist die Fähigkeit, mit einer menschlichen Stimme telefonische Anfragen kompetent zu beantworten. Dadurch wird Anrufern effektiv geholfen und die Mitarbeiterinnen und Mitarbeiter deutlich entlastet. Die Einführung von KI in den Betrieb lässt sich völlig unkompliziert gestalten und ist 100 % datenschutzkonform."
+        },
+        {
+            "id": "general_004",
+            "question": "Wer gehört zum Team der Agentur Philipp?",
+            "answer": "Das Team der Agentur PHILIPP besteht aus erfahrenen Software-Entwicklern und promovierten Data Scientists. PHILIPP betreut namhafte Konzerne sowie viele kleine und mittelständische Betriebe. \"Unser Anspruch ist es, die Vorteile der Künstlichen Intelligenz für alle zugänglich zu machen.\" betont Mann.\n\nUm auch bisher weniger technikaffinen Menschen das Thema Künstliche Intelligenz näherzubringen, haben sich die Gründer etwas Besonderes einfallen lassen: Ein humorvolles Wörterbuch, das komplexe KI-Begriffe ins Bayerische übersetzt. Mit dem Buch \"KI - Bayerisch / Bayerisch - KI\" bieten sie schnelle Hilfe für ratlose Bayern und bringen gleichzeitig ein Lächeln ins Gesicht."
+        },
+        {
+            "id": "general_005",
+            "question": "Für wen lohnt sich die Zusammenarbeit mit der Agentur Philipp?",
+            "answer": "Für Unternehmen mit Bedarf in den Bereichen KI, Software-Entwicklung oder Automatisierung bietet die Agentur PHILIPP schnelle Lösungen für alle digitalen Herausforderungen. Zum Beispiel entwickelt die Agentur derzeit gemeinsam mit dem Unternehmer Andreas Mossandl innovative Lösungen für die Bereiche Entsorgung und Nutzfahrzeug-Service.\n\n„Wir sind stolz darauf, aus Niederbayern heraus Unternehmen durch innovative KI-Lösungen zu stärken\", erklären die beiden Gründer.\n\n„KI made in Bavaria – unser Versprechen für Qualität und Innovation.\""
+        },
+        {
+            "id": "general_006",
+            "question": "Was macht die Agentur Philipp als KI- und Digitalagentur in Dingolfing?",
+            "answer": "Die Agentur Philipp ist spezialisiert auf künstliche Intelligenz, Automatisierung und digitale Lösungen für Unternehmen in Dingolfing und ganz Niederbayern. Wir entwickeln individuelle Projekte – von der Web- und App-Entwicklung bis hin zur KI-Integration in bestehende Prozesse. Unser Ziel ist es, Firmen fit für die digitale Zukunft zu machen und ihnen echte Wettbewerbsvorteile zu verschaffen."
+        },
+        {
+            "id": "general_007",
+            "question": "Welche Vorteile bringt KI für Unternehmen im Mittelstand?",
+            "answer": "Gerade im Mittelstand bietet KI enorme Chancen: Routineaufgaben können automatisiert, Prozesse effizienter gestaltet und Entscheidungen datenbasiert getroffen werden. Unternehmen sparen dadurch Zeit und Kosten, steigern ihre Produktivität und gewinnen neue Möglichkeiten zur Kundengewinnung. Mit der Agentur Philipp erhältst du maßgeschneiderte KI-Lösungen, die wirklich zu deinem Betrieb passen."
+        },
+        {
+            "id": "general_008",
+            "question": "Für welche Branchen ist der Einsatz von KI-Lösungen besonders sinnvoll?",
+            "answer": "KI lohnt sich überall dort, wo wiederkehrende Aufgaben, große Datenmengen oder komplexe Entscheidungen eine Rolle spielen. Typische Branchen sind:\n\n• Industrie & Produktion (z. B. Predictive Maintenance)\n\n• Logistik & Transport (z. B. Routenplanung, Disposition)\n\n• Handel & E-Commerce (z. B. Kundensupport, Produktempfehlungen)\n\n• Gesundheitswesen & Apotheken (z. B. digitale Assistenten, Terminmanagement)\n\n• Landwirtschaft (z. B. Analyse von Pflanzenzuständen)\n\nAls Agentur mit Sitz in Dingolfing bringen wir praxisnahe Lösungen in die Region und unterstützen Mittelständler direkt vor Ort."
+        },
+        {
+            "id": "general_009",
+            "question": "Wie läuft ein Projekt mit der Agentur Philipp ab?",
+            "answer": "Unsere Zusammenarbeit folgt einem klaren Prozess:\n\n1. Analyse & Bedarfsermittlung – wir prüfen gemeinsam, wie KI und Automatisierung helfen können.\n\n2. Konzept & Angebot – du erhältst eine transparente Planung.\n\n3. Umsetzung – individuelle Entwicklung von Web-, App- oder KI-Lösungen.\n\n4. Test & Optimierung – Qualität, Stabilität und Nutzerfreundlichkeit stehen an erster Stelle.\n\n5. Go-Live & Support – Schulungen, Workshops und kontinuierliche Begleitung sichern den Erfolg.\n\nSo stellen wir sicher, dass deine Investition in KI langfristig wirkt."
+        },
+        {
+            "id": "general_010",
+            "question": "Bietet die Agentur Philipp auch langfristige Betreuung und Optimierung an?",
+            "answer": "Ja. Neben projektbasierten Lösungen bieten wir auch eine monatliche Partnerschaft an. Dabei begleiten wir dein Unternehmen dauerhaft, optimieren bestehende Systeme und entwickeln sie Schritt für Schritt weiter. So wird dein Betrieb nachhaltig KI-Ready – mit verlässlichem Budget, regelmäßigen Abstimmungen und praxisnaher Unterstützung."
+        },
+        {
+            "id": "general_011",
+            "question": "Welche individuellen Lösungen entwickelt die Agentur – Apps, Web oder KI-Systeme?",
+            "answer": "Unsere Expertise umfasst:\n\n• Webentwicklung für moderne Unternehmensauftritte\n\n• App-Entwicklung für iOS & Android\n\n• KI-Integration für Support, Logistik, Vertrieb oder Produktion\n\n• Automatisierung von Prozessen in Verwaltung, Buchhaltung oder Kommunikation\n\n• Digitale Produkte wie interne Tools, Dashboards oder Plattformen\n\nJede Lösung wird individuell an deine Anforderungen angepasst – kein Baukasten, sondern maßgeschneiderte Entwicklung."
+        },
+        {
+            "id": "general_012",
+            "question": "Warum lohnt sich eine Zusammenarbeit mit einer KI-Agentur in Niederbayern?",
+            "answer": "Eine regionale Agentur wie PHILIPP bietet dir kurze Wege, persönliche Betreuung und Verständnis für die Herausforderungen des Mittelstands in Niederbayern. Gleichzeitig profitierst du von unserem technologischen Know-how und einem Netzwerk an Experten. Ob in Dingolfing, Landshut, Straubing oder Passau – wir sind vor Ort und kombinieren regionale Nähe mit innovativen digitalen Lösungen."
+        }
+    ]
+}

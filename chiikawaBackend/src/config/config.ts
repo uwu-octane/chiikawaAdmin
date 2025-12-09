@@ -40,6 +40,9 @@ export const config = {
     apiKey: env.QWEN_KEY,
     asrModel: env.QWEN_ASR_MODEL,
     ttsModel: env.QWEN_TTS_MODEL,
+    embeddingModel: env.QWEN_EMBEDDING_MODEL,
+    embedDimensions: env.QWEN_EMBEDDING_DIMENSIONS,
+    embeddingBaseUrl: env.QWEN_EMBEDDING_BASE_URL,
   },
 }
 export default config

@@ -71,11 +71,7 @@ export async function observabilityMiddleware(c: Context, next: Next) {
   const status = c.res.status
 
   // 检查是否是流式响应（SSE 或流式内容）
-  const contentType = c.res.headers.get('content-type') || ''
-  const isStreamingResponse =
-    contentType.includes('text/event-stream') ||
-    contentType.includes('application/stream+json') ||
-    c.res.body instanceof ReadableStream
+  const isStreamingResponse = c.res.body instanceof ReadableStream
 
   // 出站日志（跳过健康检查和流式响应）
   // 流式响应会在流结束时由其他机制记录，这里只记录初始响应

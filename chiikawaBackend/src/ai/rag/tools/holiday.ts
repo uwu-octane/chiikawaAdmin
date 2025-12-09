@@ -31,8 +31,36 @@ function getCurrentYearMonthInBerlin() {
     }).format(now),
   )
 
-  return { year, month }
+  const day = Number(
+    new Intl.DateTimeFormat('de-DE', {
+      day: 'numeric',
+      timeZone: 'Europe/Berlin',
+    }).format(now),
+  )
+
+  const weekday = new Intl.DateTimeFormat('de-DE', {
+    weekday: 'long',
+    timeZone: 'Europe/Berlin',
+  }).format(now) // e.g. "Dienstag"
+
+  const isoDate = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`
+
+  return { year, month, day, weekday, isoDate }
 }
+
+export const getCurrentYearMonthInBerlinTool = tool({
+  description:
+    'Get the current date (year, month, day and weekday) in the Europe/Berlin time zone. ' +
+    'Useful for resolving relative dates like "next Monday" or "in 3 months".',
+
+  inputSchema: z
+    .object({})
+    .describe('No input required. Returns current date information in Europe/Berlin.'),
+
+  async execute() {
+    return getCurrentYearMonthInBerlin()
+  },
+})
 
 /**
  * Query the public holidays in Bavaria (DE-BY) for a given month

@@ -1,20 +1,19 @@
 // src/stt/qwen-asr-mic-demo.ts
+import '@/ai/llm/provider'
 import record from 'node-record-lpcm16'
 import { createQwenAsrSession } from './client'
-import { llmClient } from '@/ai/llm/client'
 import type { ModelMessage } from 'ai'
 import { createQwenTtsSession } from '../tts/client'
+import { rewriteLastUserMessage } from '@/ai/conversation/conversation'
+import { rewriteInput } from '@/ai/llm/rewriter/rewriter'
+import { createReceptionAgent } from '@/ai/llm/assistant/assistant'
 
 async function main() {
   console.log('[STT] Initializing microphone transcription system...')
 
-  const messages: ModelMessage[] = [
-    {
-      role: 'system',
-      content:
-        'You are a voice assistant, answer in a concise manner to facilitate voice conversation reading.',
-    },
-  ]
+  let messages: ModelMessage[] = []
+  const assistantAgent = await createReceptionAgent()
+
   let isStreaming = false
   let turnIndex = 0
   let canTalk = false
@@ -59,30 +58,46 @@ async function main() {
           content: text,
         })
 
+        if (messages.length > 20) {
+          messages = messages.slice(-20)
+        }
+
         if (isStreaming) {
           console.log('[LLM] Waiting for previous response to complete...')
           return
+        }
+        try {
+          // get last 20 messages
+
+          if (messages.length === 0) {
+            console.log('[REWRITE] No history messages, skipping rewrite')
+          } else {
+            const rewrittenUserMessage = await rewriteInput(text, messages)
+            messages = rewriteLastUserMessage(messages, rewrittenUserMessage)
+          }
+        } catch (err) {
+          console.error('[LLM] Error:', err)
         }
 
         isStreaming = true
         try {
           console.log('[LLM] Processing request...')
-          const result = await llmClient.streamChatRaw({
-            logicalModelId: 'fast-chat' as const,
+          //   const result = await llmClient.streamChatRaw({
+          //     logicalModelId: 'fast-chat' as const,
+          //     messages: messages,
+          //   })
+
+          const result = await assistantAgent.stream({
             messages: messages,
           })
           process.stdout.write(`[Turn ${turnIndex}] Assistant: `)
-          let fullText = ''
           for await (const textPart of result.textStream) {
             process.stdout.write(textPart)
-            fullText += textPart
             ttsSession.appendText(textPart)
           }
           console.log('')
-          messages.push({
-            role: 'assistant',
-            content: fullText,
-          })
+          const { messages: updatedMessages } = await result.response
+          messages = updatedMessages
           ttsSession.commit()
           console.log('[TTS] Response queued for playback')
           console.log('[PTT] Press spacebar to continue')
@@ -100,7 +115,6 @@ async function main() {
       },
     },
   )
-  console.log('[MIC] Starting microphone recording...')
   const rec = record.record({
     sampleRate: 16000,
     channels: 1,

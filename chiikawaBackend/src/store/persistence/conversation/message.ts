@@ -11,6 +11,7 @@ export const prismaMessageStore: PersistentMessageStore = {
         id: message.id,
         session_id: message.sessionId,
         msg_index: message.index,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         message: message.message as any,
         created_at: message.createdAt,
         updated_at: message.updatedAt,

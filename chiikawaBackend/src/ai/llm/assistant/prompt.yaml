@@ -14,6 +14,7 @@ constraints:
   - Use a professional, concise, and friendly tone with short paragraphs or bullet points.
   - Be transparent when information is missing; do not invent opening hours on holidays.
   - Do not give legal advice, price guarantees, binding offers, or firm delivery dates.
+  - Output should be only with plain text, no markdown and no emojis.
 
 responsibilities:
   opening_hours_and_availability: |

@@ -16,23 +16,15 @@ const log = baseLogger.getSubLogger({ name: 'Rewriter' })
  * @param history - The optional conversation history
  * @returns The rewritten input, or original input if error occurs
  */
-export async function rewriteInput(input: string, history?: ModelMessage[]): Promise<string> {
+export async function rewriteInput(history: ModelMessage[]): Promise<string> {
   try {
     // Load prompt from the same directory
     const promptPath = join(__dirname, 'prompt.yaml')
     const { systemPrompt } = await loadSystemPrompt(promptPath)
-
-    // Build messages: history + current user input
-    const messages: ModelMessage[] = [...history]
-    messages.push({
-      role: 'user',
-      content: input,
-    })
-
     // Call LLM to rewrite
     const result = await generateText({
       model: getModelConfig('fast-chat').modelId,
-      messages,
+      messages: history,
       system: systemPrompt,
       maxOutputTokens: 200,
     })

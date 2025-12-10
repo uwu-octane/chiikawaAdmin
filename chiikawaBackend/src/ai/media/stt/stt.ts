@@ -74,7 +74,7 @@ async function main() {
           if (messages.length === 0) {
             log.info('[REWRITE] No history messages, skipping rewrite')
           } else {
-            const rewrittenUserMessage = await rewriteInput(text, messages)
+            const rewrittenUserMessage = await rewriteInput(messages)
             messages = rewriteLastUserMessage(messages, rewrittenUserMessage)
           }
         } catch (err) {

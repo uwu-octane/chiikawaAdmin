@@ -14,7 +14,7 @@ export function rewriteLastUserMessage(messages: ModelMessage[], newInput: strin
     if (next[i].role === 'user') {
       next[i] = {
         role: 'user',
-        content: newInput,
+        content: `original user message：${next[i].content}\nrewritten user message：${newInput}`,
       }
       break
     }

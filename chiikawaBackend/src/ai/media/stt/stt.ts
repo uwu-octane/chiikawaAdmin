@@ -59,7 +59,7 @@ async function main() {
           role: 'user',
           content: text,
         })
-
+        log.info('[MESSAGES] Messages length:', messages.length)
         if (messages.length > 20) {
           messages = messages.slice(-20)
         }
@@ -69,13 +69,14 @@ async function main() {
           return
         }
         try {
-          // get last 20 messages
-
           if (messages.length === 0) {
             log.info('[REWRITE] No history messages, skipping rewrite')
           } else {
             const rewrittenUserMessage = await rewriteInput(messages)
-            messages = rewriteLastUserMessage(messages, rewrittenUserMessage)
+            if (rewrittenUserMessage) {
+              messages = rewriteLastUserMessage(messages, rewrittenUserMessage)
+            }
+            log.info('[REWRITE] Rewritten messages:', messages)
           }
         } catch (err) {
           log.error('[LLM] Error:', err)
@@ -84,10 +85,6 @@ async function main() {
         isStreaming = true
         try {
           log.info('[LLM] Processing request...')
-          //   const result = await llmClient.streamChatRaw({
-          //     logicalModelId: 'fast-chat' as const,
-          //     messages: messages,
-          //   })
 
           const result = await assistantAgent.stream({
             messages: messages,

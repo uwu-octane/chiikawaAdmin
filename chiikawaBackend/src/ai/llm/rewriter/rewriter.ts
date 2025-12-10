@@ -22,19 +22,22 @@ export async function rewriteInput(history: ModelMessage[]): Promise<string> {
     const promptPath = join(__dirname, 'prompt.yaml')
     const { systemPrompt } = await loadSystemPrompt(promptPath)
     // Call LLM to rewrite
+    // Filter out messages with role='tool'
+    //const filteredHistory = history.filter((msg) => msg.role !== 'tool')
+    log.info({ history }, 'History')
     const result = await generateText({
-      model: getModelConfig('fast-chat').modelId,
+      model: getModelConfig('smart-chat').modelId,
       messages: history,
       system: systemPrompt,
-      maxOutputTokens: 200,
+      maxOutputTokens: 800,
     })
 
     const rewritten = result.text.trim()
     log.info({ rewritten }, 'Rewritten input')
-    return rewritten || input
+    return rewritten
   } catch (error) {
     // On error, return original input
     log.error({ error }, 'Error during rewrite')
-    return input
+    return ''
   }
 }

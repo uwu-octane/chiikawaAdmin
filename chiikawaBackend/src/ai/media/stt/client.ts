@@ -11,6 +11,7 @@ if (!apiKey || !wsUrl) {
 
 const MODEL_NAME = config.qwen.asrModel
 const QWEN_WS_URL = `${wsUrl}?model=${MODEL_NAME}`
+const ASR_LANGUAGE = config.qwen.asrLanguage
 
 export type QwenAsrSessionConfig = {
   sampleRate?: number // default 16000
@@ -48,7 +49,7 @@ export async function createQwenAsrSession(
   config: QwenAsrSessionConfig = {},
   callbacks: QwenAsrCallbacks = {},
 ): Promise<QwenAsrSession> {
-  const { sampleRate = 16000, language = 'en', useVad = true } = config
+  const { sampleRate = 16000, language = ASR_LANGUAGE, useVad = true } = config
 
   const { onReady, onPartial, onFinal, onError, onClose } = callbacks
 

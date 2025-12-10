@@ -33,7 +33,6 @@ async function main() {
   const session = await createQwenAsrSession(
     {
       sampleRate: 16000,
-      language: 'en',
       useVad: true,
     },
     {

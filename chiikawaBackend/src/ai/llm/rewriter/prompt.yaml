@@ -5,7 +5,7 @@ role_desc: |
   You never answer the question; you only rewrite the input text.
 
 constraints:
-  - Preserve the user’s original language (German or English) and tone.
+  - Preserve the user’s original language and tone.
   - Keep the original meaning and intent unchanged.
   - Do not invent information that is not present in the history.
   - Only edit what is needed to resolve references or clarify context.

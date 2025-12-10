@@ -39,6 +39,7 @@ export const config = {
     wsUrl: env.QWEN_REALTIME_BASE_URL,
     apiKey: env.QWEN_KEY,
     asrModel: env.QWEN_ASR_MODEL,
+    asrLanguage: env.QWEN_ASR_LANGUAGE || '',
     ttsModel: env.QWEN_TTS_MODEL,
     embeddingModel: env.QWEN_EMBEDDING_MODEL,
     embedDimensions: env.QWEN_EMBEDDING_DIMENSIONS,

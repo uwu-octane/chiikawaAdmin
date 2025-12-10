@@ -5,9 +5,11 @@ import { loadSystemPrompt } from '@/ai/llm/loadPrompt'
 import { getModelConfig } from '@/ai/llm/model'
 import { join, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { baseLogger } from '@/logger/logger'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 
+const log = baseLogger.getSubLogger({ name: 'Rewriter' })
 /**
  * Rewrites user input based on conversation history for coreference resolution
  * @param input - The input text
@@ -36,11 +38,11 @@ export async function rewriteInput(input: string, history?: ModelMessage[]): Pro
     })
 
     const rewritten = result.text.trim()
-    console.log('[REWRITER] Rewritten input:', rewritten)
+    log.info({ rewritten }, 'Rewritten input')
     return rewritten || input
   } catch (error) {
     // On error, return original input
-    console.error('[REWRITER] Error during rewrite:', error)
+    log.error({ error }, 'Error during rewrite')
     return input
   }
 }

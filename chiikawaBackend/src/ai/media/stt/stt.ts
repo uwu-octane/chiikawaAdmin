@@ -7,9 +7,12 @@ import { createQwenTtsSession } from '../tts/client'
 import { rewriteLastUserMessage } from '@/ai/conversation/conversation'
 import { rewriteInput } from '@/ai/llm/rewriter/rewriter'
 import { createReceptionAgent } from '@/ai/llm/assistant/assistant'
+import { baseLogger } from '@/logger/logger'
+
+const log = baseLogger.getSubLogger({ name: 'STT' })
 
 async function main() {
-  console.log('[STT] Initializing microphone transcription system...')
+  log.info('[STT] Initializing microphone transcription system...')
 
   let messages: ModelMessage[] = []
   const assistantAgent = await createReceptionAgent()
@@ -18,18 +21,18 @@ async function main() {
   let turnIndex = 0
   let canTalk = false
 
-  console.log('[TTS] Initializing text-to-speech session...')
+  log.info('[TTS] Initializing text-to-speech session...')
   const ttsSession = await createQwenTtsSession({
     voice: 'Cherry',
   })
-  console.log('[TTS] Session ready')
+  log.info('[TTS] Session ready')
 
   setupPushToTalkKey(() => {
     canTalk = true
-    console.log('[PTT] Listening... (recognition will stop automatically after speaking)')
+    log.info('[PTT] Listening... (recognition will stop automatically after speaking)')
   })
 
-  console.log('[ASR] Creating Qwen ASR session...')
+  log.info('[ASR] Creating Qwen ASR session...')
   const session = await createQwenAsrSession(
     {
       sampleRate: 16000,
@@ -37,8 +40,8 @@ async function main() {
     },
     {
       onReady: () => {
-        console.log('[ASR] Session ready')
-        console.log('[PTT] Press spacebar to start speaking')
+        log.info('[ASR] Session ready')
+        log.info('[PTT] Press spacebar to start speaking')
       },
       onPartial: (text) => {
         process.stdout.write(`\r[ASR] Partial: ${text.padEnd(50)}`)
@@ -50,7 +53,7 @@ async function main() {
         process.stdout.write('\r' + ' '.repeat(60) + '\r')
 
         turnIndex++
-        console.log(`[Turn ${turnIndex}] User: ${text}`)
+        log.info(`[Turn ${turnIndex}] User: ${text}`)
 
         messages.push({
           role: 'user',
@@ -62,25 +65,25 @@ async function main() {
         }
 
         if (isStreaming) {
-          console.log('[LLM] Waiting for previous response to complete...')
+          log.info('[LLM] Waiting for previous response to complete...')
           return
         }
         try {
           // get last 20 messages
 
           if (messages.length === 0) {
-            console.log('[REWRITE] No history messages, skipping rewrite')
+            log.info('[REWRITE] No history messages, skipping rewrite')
           } else {
             const rewrittenUserMessage = await rewriteInput(text, messages)
             messages = rewriteLastUserMessage(messages, rewrittenUserMessage)
           }
         } catch (err) {
-          console.error('[LLM] Error:', err)
+          log.error('[LLM] Error:', err)
         }
 
         isStreaming = true
         try {
-          console.log('[LLM] Processing request...')
+          log.info('[LLM] Processing request...')
           //   const result = await llmClient.streamChatRaw({
           //     logicalModelId: 'fast-chat' as const,
           //     messages: messages,
@@ -94,23 +97,23 @@ async function main() {
             process.stdout.write(textPart)
             ttsSession.appendText(textPart)
           }
-          console.log('')
+          log.info('')
           const { messages: updatedMessages } = await result.response
           messages = updatedMessages
           ttsSession.commit()
-          console.log('[TTS] Response queued for playback')
-          console.log('[PTT] Press spacebar to continue')
+          log.info('[TTS] Response queued for playback')
+          log.info('[PTT] Press spacebar to continue')
         } catch (err) {
-          console.error('[LLM] Error:', err)
+          log.error('[LLM] Error:', err)
         } finally {
           isStreaming = false
         }
       },
       onError: (err) => {
-        console.error('[ASR] Error:', err)
+        log.error('[ASR] Error:', err)
       },
       onClose: (code, reason) => {
-        console.log(`[ASR] Session closed: code=${code}, reason=${reason}`)
+        log.info(`[ASR] Session closed: code=${code}, reason=${reason}`)
       },
     },
   )
@@ -132,26 +135,26 @@ async function main() {
   })
 
   micStream.on('error', (err) => {
-    console.error('[MIC] Stream error:', err)
+    log.error('[MIC] Stream error:', err)
     session.close(1011, 'mic error')
   })
 
   micStream.on('end', () => {
-    console.log('[MIC] Stream ended')
+    log.info('[MIC] Stream ended')
     session.close(1000, 'mic end')
   })
 
   process.on('SIGINT', () => {
-    console.log('\n[STT] Shutting down...')
+    log.info('\n[STT] Shutting down...')
     try {
       rec.stop()
-      console.log('[MIC] Recording stopped')
+      log.info('[MIC] Recording stopped')
     } catch (e) {
-      console.error('[MIC] Stop recorder error:', e)
+      log.error('[MIC] Stop recorder error:', e)
     }
     session.close(1000, 'SIGINT')
     ttsSession.close()
-    console.log('[STT] Cleanup complete')
+    log.info('[STT] Cleanup complete')
     setTimeout(() => process.exit(0), 500)
   })
 }
@@ -175,6 +178,6 @@ function setupPushToTalkKey(onStartTalk: () => void) {
   })
 }
 main().catch((err) => {
-  console.error('[STT] Fatal error:', err)
+  log.error('[STT] Fatal error:', err)
   process.exit(1)
 })

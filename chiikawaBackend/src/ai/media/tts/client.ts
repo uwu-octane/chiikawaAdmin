@@ -2,6 +2,9 @@ import config from '@/config/config'
 import WebSocket from 'ws'
 import { spawn, type ChildProcessWithoutNullStreams } from 'node:child_process'
 import { randomUUID } from 'node:crypto'
+import { baseLogger } from '@/logger/logger'
+
+const log = baseLogger.getSubLogger({ name: 'Qwen-TTS' })
 
 const apiKey = config.qwen.apiKey
 const wsUrl = config.qwen.wsUrl
@@ -29,7 +32,7 @@ export function createQwenTtsSession(cfg: QwenTtsConfig): Promise<QwenTtsSession
         Authorization: `Bearer ${apiKey}`,
       },
     })
-    console.log('[Qwen-TTS] connecting to:', wsUrl)
+    log.info('[Qwen-TTS] connecting to:', wsUrl)
 
     const player: ChildProcessWithoutNullStreams = spawn('play', [
       '-t',
@@ -51,9 +54,9 @@ export function createQwenTtsSession(cfg: QwenTtsConfig): Promise<QwenTtsSession
 
     player.on('exit', (code, signal) => {
       if (code !== 0 && code !== null) {
-        console.error(`[Qwen-TTS][sox] exit with error: code=${code} signal=${signal ?? ''}`)
+        log.error(`[Qwen-TTS][sox] exit with error: code=${code} signal=${signal ?? ''}`)
       } else {
-        console.log(`[Qwen-TTS][sox] exit: code=${code ?? ''} signal=${signal ?? ''}`)
+        log.info(`[Qwen-TTS][sox] exit: code=${code ?? ''} signal=${signal ?? ''}`)
       }
     })
 
@@ -62,14 +65,14 @@ export function createQwenTtsSession(cfg: QwenTtsConfig): Promise<QwenTtsSession
 
     function send(event: { event_id: string; type: string; [key: string]: unknown }) {
       if (ws.readyState !== WebSocket.OPEN) {
-        console.warn('[Qwen-TTS] WS not open, drop event:', event?.type)
+        log.warn('[Qwen-TTS] WS not open, drop event:', event?.type)
         return
       }
       ws.send(JSON.stringify(event))
     }
 
     ws.on('open', () => {
-      console.log('[Qwen-TTS] WS connected')
+      log.info('[Qwen-TTS] WS connected')
 
       send({
         event_id: randomUUID(),
@@ -97,7 +100,7 @@ export function createQwenTtsSession(cfg: QwenTtsConfig): Promise<QwenTtsSession
       try {
         msg = JSON.parse(data.toString()) as { type?: string; [key: string]: unknown }
       } catch {
-        console.error('[Qwen-TTS] invalid JSON from server:', data.toString())
+        log.error('[Qwen-TTS] invalid JSON from server:', data.toString())
         return
       }
 
@@ -106,7 +109,7 @@ export function createQwenTtsSession(cfg: QwenTtsConfig): Promise<QwenTtsSession
       if (type === 'session.created') {
         sessionCreated = true
         const session = msg.session as { id?: string } | undefined
-        console.log('[Qwen-TTS] session.created:', session?.id)
+        log.info('[Qwen-TTS] session.created:', session?.id)
         return
       }
 
@@ -131,28 +134,28 @@ export function createQwenTtsSession(cfg: QwenTtsConfig): Promise<QwenTtsSession
           const silence = Buffer.alloc(paddingBytes, 0)
           player.stdin.write(silence)
         } catch (e) {
-          console.error('[Qwen-TTS] zero padding error:', e)
+          log.error('[Qwen-TTS] zero padding error:', e)
         }
         return
       }
 
       if (type === 'error') {
-        console.error('[Qwen-TTS] error:', msg.error)
+        log.error('[Qwen-TTS] error:', msg.error)
         return
       }
     })
 
     ws.on('close', (code, reason) => {
-      console.log(`[Qwen-TTS] WS closed: code=${code}, reason=${reason.toString()}`)
+      log.info(`[Qwen-TTS] WS closed: code=${code}, reason=${reason.toString()}`)
       try {
         player.stdin.end()
       } catch {
-        console.error('[Qwen-TTS] player error on close')
+        log.error('[Qwen-TTS] player error on close')
       }
     })
 
     ws.on('error', (err) => {
-      console.error('[Qwen-TTS] WS error:', err)
+      log.error('[Qwen-TTS] WS error:', err)
       if (!sessionCreated) {
         reject(err)
       }
@@ -161,7 +164,7 @@ export function createQwenTtsSession(cfg: QwenTtsConfig): Promise<QwenTtsSession
     function appendText(fragment: string) {
       if (!fragment || !fragment.trim()) return
       if (!ready) {
-        console.warn('[Qwen-TTS] not ready yet, skip fragment:', fragment.slice(0, 20))
+        log.warn('[Qwen-TTS] not ready yet, skip fragment:', fragment.slice(0, 20))
         return
       }
 

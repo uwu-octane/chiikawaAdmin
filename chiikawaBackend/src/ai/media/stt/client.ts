@@ -2,6 +2,9 @@
 import WebSocket from 'ws'
 import crypto from 'node:crypto'
 import config from '@/config/config'
+import { baseLogger } from '@/logger/logger'
+
+const log = baseLogger.getSubLogger({ name: 'Qwen-ASR' })
 
 const apiKey = config.qwen.apiKey
 const wsUrl = config.qwen.wsUrl
@@ -54,8 +57,8 @@ export async function createQwenAsrSession(
   const { onReady, onPartial, onFinal, onError, onClose } = callbacks
 
   return new Promise<QwenAsrSession>((resolve, reject) => {
-    console.log('[Qwen-ASR] connecting to WebSocket:', QWEN_WS_URL)
-    console.log('[Qwen-ASR] API Key is set:', apiKey ? `${apiKey.substring(0, 8)}...` : 'not set')
+    log.info('[Qwen-ASR] connecting to WebSocket:', QWEN_WS_URL)
+    log.info('[Qwen-ASR] API Key is set:', apiKey ? `${apiKey.substring(0, 8)}...` : 'not set')
 
     const ws = new WebSocket(QWEN_WS_URL, {
       headers: {
@@ -66,7 +69,7 @@ export async function createQwenAsrSession(
     let sessionCreated = false
 
     ws.on('open', () => {
-      console.log('[Qwen-ASR] WS connected to:', QWEN_WS_URL)
+      log.info('[Qwen-ASR] WS connected to:', QWEN_WS_URL)
 
       // Send session.update to configure sample rate, language, and VAD
       const sessionUpdatePayload = {
@@ -93,7 +96,7 @@ export async function createQwenAsrSession(
       const session: QwenAsrSession = {
         sendAudio(chunk: Buffer) {
           if (ws.readyState !== WebSocket.OPEN) {
-            console.warn('[Qwen-ASR] WS not open, drop audio chunk')
+            log.warn('[Qwen-ASR] WS not open, drop audio chunk')
             return
           }
           const audioB64 = chunk.toString('base64')
@@ -108,7 +111,7 @@ export async function createQwenAsrSession(
           try {
             ws.close(code, reason)
           } catch (e) {
-            console.error('[Qwen-ASR] close error:', e)
+            log.error('[Qwen-ASR] close error:', e)
           }
         },
       }
@@ -122,7 +125,7 @@ export async function createQwenAsrSession(
       try {
         msg = JSON.parse(raw.toString('utf-8')) as { type?: string; [key: string]: unknown }
       } catch {
-        console.warn('[Qwen-ASR] invalid JSON from server:', raw.toString())
+        log.warn('[Qwen-ASR] invalid JSON from server:', raw.toString())
         return
       }
 
@@ -133,17 +136,17 @@ export async function createQwenAsrSession(
         case 'session.created': {
           sessionCreated = true
           const session = msg.session as { id?: string } | undefined
-          console.log('[Qwen-ASR] session created:', session?.id)
+          log.info('[Qwen-ASR] session created:', session?.id)
           onReady?.()
           break
         }
 
         case 'input_audio_buffer.speech_started':
-          console.log('>>> [VAD] speech started')
+          log.info('>>> [VAD] speech started')
           break
 
         case 'input_audio_buffer.speech_stopped':
-          console.log('<<< [VAD] speech stopped')
+          log.info('<<< [VAD] speech stopped')
           break
 
         case 'conversation.item.input_audio_transcription.text': {
@@ -156,7 +159,7 @@ export async function createQwenAsrSession(
         case 'conversation.item.input_audio_transcription.completed': {
           const transcript = msg.transcript as string
           onFinal?.(transcript)
-          console.log('[Qwen-ASR] final:', transcript)
+          log.info('[Qwen-ASR] final:', transcript)
           break
         }
 
@@ -167,8 +170,8 @@ export async function createQwenAsrSession(
     })
 
     ws.on('error', (err) => {
-      console.error('[Qwen-ASR] WS error:', err)
-      console.error('[Qwen-ASR] Error details:', {
+      log.error('[Qwen-ASR] WS error:', err)
+      log.error('[Qwen-ASR] Error details:', {
         message: err.message,
         type: err.type,
         target: err.target?.url,
@@ -181,7 +184,7 @@ export async function createQwenAsrSession(
     })
 
     ws.on('close', (code, reason) => {
-      console.log('[Qwen-ASR] WS closed:', code, reason.toString())
+      log.info('[Qwen-ASR] WS closed:', code, reason.toString())
       onClose?.(code, reason.toString())
     })
   })

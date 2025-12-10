@@ -5,6 +5,9 @@ import { Experimental_Agent as Agent, stepCountIs, type StepResult, type ToolSet
 import { loadSystemPrompt } from '@/ai/llm/loadPrompt'
 import { getModelConfig } from '@/ai/llm/model'
 import { tools } from '@/ai/rag/tools'
+import { baseLogger } from '@/logger/logger'
+
+const log = baseLogger.getSubLogger({ name: 'Assistant' })
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 
@@ -35,29 +38,29 @@ function logStep<TOOLS extends ToolSet>(stepResult: StepResult<TOOLS>) {
 
   const { text, toolCalls, toolResults, finishReason, usage } = stepResult
 
-  console.log('\n================ [AGENT STEP FINISHED] ================')
-  console.log('Step #:', stepCounter)
-  console.log('finishReason:', finishReason)
-  console.log('text (preview):', text.slice(0, 120))
+  log.info('\n================ [AGENT STEP FINISHED] ================')
+  log.info({ stepCounter }, 'Step #:')
+  log.info({ finishReason }, 'finishReason')
+  log.info({ text: text.slice(0, 120) }, 'text (preview)')
 
   if (toolCalls.length === 0) {
-    console.log('Tool calls: none')
+    log.info('Tool calls: none')
   } else {
-    console.log(`Tool calls (${toolCalls.length}):`)
+    log.info(`Tool calls (${toolCalls.length}):`)
     for (const call of toolCalls) {
-      console.log(`- tool: ${call.toolName}`)
-      console.log(`  id:   ${call.toolCallId}`)
-      console.log(`  args: ${JSON.stringify(call.input)}`)
+      log.info({ toolName: call.toolName }, `- tool: ${call.toolName}`)
+      log.info({ toolCallId: call.toolCallId }, `  id:   ${call.toolCallId}`)
+      log.info({ input: call.input }, `  args: ${JSON.stringify(call.input)}`)
     }
   }
 
   if (toolResults.length > 0) {
-    console.log(`Tool results (${toolResults.length}):`)
+    log.info(`Tool results (${toolResults.length}):`)
     for (const res of toolResults) {
-      console.log(`  output: ${JSON.stringify(res.output)}`)
+      log.info({ output: res.output }, `  output: ${JSON.stringify(res.output)}`)
     }
   }
 
-  console.log('usage:', usage)
-  console.log('=======================================================\n')
+  log.info({ usage }, 'usage')
+  log.info('=======================================================\n')
 }

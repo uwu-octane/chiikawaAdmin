@@ -8,6 +8,7 @@ import { register } from './consul/register'
 import baseLogger from './logger/logger'
 import { observabilityMiddleware } from './middleware/observability'
 import { cors } from 'hono/cors'
+import { dbMiddleware } from './middleware/db'
 type AppEnv = {
   Variables: {
     HTTP_REQUEST_ID: string
@@ -33,6 +34,7 @@ app.use(
       allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     }),
   ),
+  dbMiddleware,
 )
 
 app.route('/', api)

@@ -19,6 +19,7 @@ export const config = {
     apiBase: env.API_BASE || '/chiikawa/api',
     mode: env.MODE || 'DEV',
     testKey: env.TEST_KEY,
+    databaseUrl: env.DATABASE_URL,
     // HTTP 请求空闲超时时间（秒），最大 255 秒，默认 255 秒
     // 注意：Bun.serve 的 idleTimeout 最大值为 255 秒
     idleTimeout: env.APP_IDLE_TIMEOUT ? Math.min(255, Number(env.APP_IDLE_TIMEOUT)) : 255,

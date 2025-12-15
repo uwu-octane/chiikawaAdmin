@@ -1,12 +1,11 @@
 import { ChatRequestBody } from './chat-mapper'
 import { convertToModelMessages, type ModelMessage, type UIMessage } from 'ai'
 import { llmClient } from '@/ai/llm/client'
-import type { ConversationSession } from '@/store/schema/conversation/session'
-import { getConversationRepository } from '@/store/repository/conversation/repo'
-import type { ConversationMessage } from '@/store/schema/conversation/message'
+import type { ConversationSession, ConversationMessage } from '@/store'
+import { getConversationStore } from '@/store'
 import { baseLogger } from '@/logger/logger'
-const conversationRepository = await getConversationRepository()
-const { sessions: sessionStore, messages: messageStore } = conversationRepository
+const conversationStore = await getConversationStore()
+const { sessions: sessionStore, messages: messageStore } = conversationStore
 const log = baseLogger.getSubLogger({ name: 'chatController' })
 
 function extractTextFromUIMessage(msg: UIMessage): { text: string; uiMessageId?: string } {
@@ -20,18 +19,23 @@ export const chatController = {
     const sessionId = body.id
     const uiMessage: UIMessage = body.message
     log.debug({ uiMessageParts: uiMessage.parts }, 'received uiMessage')
-    const now = new Date()
+    const now = new Date().toISOString()
 
     //* upsert session
     let session: ConversationSession | null = await sessionStore.getById(sessionId)
     if (!session) {
       session = {
         sessionId: sessionId,
-        channel: 'web-chat' as const,
+        userId: null,
+        tenantId: null,
+        channel: 'web-chat',
+        title: null,
+        deleted: false,
         startedAt: now,
         lastMessageAt: now,
         createdAt: now,
         updatedAt: now,
+        metadata: null,
       }
     } else {
       session = {
@@ -44,9 +48,9 @@ export const chatController = {
 
     //* list history messages and sort
     const historyMessages: ConversationMessage[] = await messageStore.listBySessionId(sessionId)
-    historyMessages.sort((a, b) => a.index - b.index)
+    historyMessages.sort((a, b) => a.msgIndex - b.msgIndex)
 
-    const historyUiMessages: UIMessage[] = historyMessages.map((m) => m.message)
+    const historyUiMessages: UIMessage[] = historyMessages.map((m) => m.message as UIMessage)
     const { text: userText } = extractTextFromUIMessage(uiMessage)
     if (!userText || !userText.trim()) {
       throw new Error('Empty user message content')
@@ -57,8 +61,8 @@ export const chatController = {
     const userConvMessage: ConversationMessage = {
       id: `msg_${sessionId}_${nextIndex}`,
       sessionId,
-      index: nextIndex,
-      message: uiMessage,
+      msgIndex: nextIndex,
+      message: uiMessage as unknown,
       createdAt: now,
       updatedAt: now,
     }
@@ -92,12 +96,12 @@ export const chatController = {
           log.error('assistantText is empty')
           return
         }
-        const nowFinish = new Date()
+        const nowFinish = new Date().toISOString()
         const assistantConvMessage: ConversationMessage = {
           id: `msg_${sessionId}_${assistantIndex}`,
           sessionId,
-          index: assistantIndex,
-          message: responseMessage,
+          msgIndex: assistantIndex,
+          message: responseMessage as unknown,
           createdAt: nowFinish,
           updatedAt: nowFinish,
         }

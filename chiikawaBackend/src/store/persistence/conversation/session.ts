@@ -1,62 +1,30 @@
-import { prisma } from '@/db/prisma'
-import { Prisma } from '@/db/generated/prisma/client'
-import {
-  ConversationSessionSchema,
-  type ConversationSession,
-  type SessionStore,
-} from '../../schema/conversation/session'
+import { eq } from 'drizzle-orm'
+import { db } from '@/db'
+import { conversationSessions } from '@/db/schema'
+import type { ConversationSession, SessionStore } from '../../schema/conversation/session'
 
-export const prismaSessionStore: SessionStore = {
+/**
+ * Drizzle 实现的会话持久化存储
+ * 直接使用 Drizzle 类型，无需转换
+ */
+export const drizzleSessionStore: SessionStore = {
   async getById(id: string): Promise<ConversationSession | null> {
-    const row = await prisma.conversation_sessions.findUnique({
-      where: { session_id: id },
-    })
+    const rows = await db
+      .select()
+      .from(conversationSessions)
+      .where(eq(conversationSessions.sessionId, id))
+      .limit(1)
 
-    if (!row) return null
-
-    return ConversationSessionSchema.parse({
-      sessionId: row.session_id,
-      userId: row.user_id,
-      tenantId: row.tenant_id,
-      channel: row.channel,
-      title: row.title,
-      deleted: row.deleted,
-      startedAt: row.started_at,
-      lastMessageAt: row.last_message_at,
-      createdAt: row.created_at,
-      updatedAt: row.updated_at,
-      metadata: row.metadata as Record<string, unknown> | undefined,
-    })
+    return rows[0] ?? null
   },
 
   async upsert(session: ConversationSession): Promise<void> {
-    await prisma.conversation_sessions.upsert({
-      where: { session_id: session.sessionId },
-      update: {
-        user_id: session.userId,
-        tenant_id: session.tenantId,
-        channel: session.channel,
-        title: session.title,
-        deleted: session.deleted ?? false,
-        started_at: session.startedAt,
-        last_message_at: session.lastMessageAt,
-        created_at: session.createdAt,
-        updated_at: session.updatedAt,
-        metadata: session.metadata as Prisma.InputJsonValue | null | undefined,
-      },
-      create: {
-        session_id: session.sessionId,
-        user_id: session.userId,
-        tenant_id: session.tenantId,
-        channel: session.channel,
-        title: session.title,
-        deleted: session.deleted ?? false,
-        started_at: session.startedAt,
-        last_message_at: session.lastMessageAt,
-        created_at: session.createdAt,
-        updated_at: session.updatedAt,
-        metadata: session.metadata as Prisma.InputJsonValue | null | undefined,
-      },
+    await db.insert(conversationSessions).values(session).onConflictDoUpdate({
+      target: conversationSessions.sessionId,
+      set: session,
     })
   },
 }
+
+// 导出别名以保持向后兼容
+export const sessionStore = drizzleSessionStore

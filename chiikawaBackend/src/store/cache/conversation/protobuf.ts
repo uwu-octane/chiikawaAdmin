@@ -2,7 +2,6 @@ import { join } from 'path'
 import { loadSync, type Root } from 'protobufjs'
 import type { ConversationMessage } from '../../schema/conversation/message'
 import type { ConversationSession } from '../../schema/conversation/session'
-import type { UIMessage } from 'ai'
 
 // 加载 proto 文件
 const protoPath = join(process.cwd(), 'proto', 'conversation.proto')
@@ -11,17 +10,20 @@ const ConversationMessageType = root.lookupType('conversation.ConversationMessag
 const ConversationSessionType = root.lookupType('conversation.ConversationSession')
 
 /**
- * 将 Date 转换为 Unix 时间戳（毫秒）
+ * 将 ISO string 或 Date 转换为 Unix 时间戳（毫秒）
  */
-function dateToTimestamp(date: Date): number {
-  return date.getTime()
+function toTimestamp(dateOrString: string | Date): number {
+  if (typeof dateOrString === 'string') {
+    return new Date(dateOrString).getTime()
+  }
+  return dateOrString.getTime()
 }
 
 /**
- * 将 Unix 时间戳（毫秒）转换为 Date
+ * 将 Unix 时间戳（毫秒）转换为 ISO string
  */
-function timestampToDate(timestamp: number): Date {
-  return new Date(timestamp)
+function fromTimestamp(timestamp: number): string {
+  return new Date(timestamp).toISOString()
 }
 
 /**
@@ -60,10 +62,10 @@ export function serializeMessage(message: ConversationMessage): Buffer {
     // 注意：protobufjs 会自动把 camelCase 映射到 proto 的 snake_case
     id: message.id,
     sessionId: message.sessionId,
-    index: message.index,
-    uiMessageJson: JSON.stringify(message.message as UIMessage),
-    createdAt: dateToTimestamp(message.createdAt),
-    updatedAt: dateToTimestamp(message.updatedAt),
+    index: message.msgIndex,
+    uiMessageJson: JSON.stringify(message.message),
+    createdAt: toTimestamp(message.createdAt),
+    updatedAt: toTimestamp(message.updatedAt),
     //metadata
   }
 
@@ -91,17 +93,13 @@ export function deserializeMessage(buffer: Buffer): ConversationMessage {
     oneofs: true,
   })
 
-  // 还原 UIMessage
-  const uiMessage = JSON.parse(obj.uiMessageJson as string) as UIMessage
-
   return {
     id: obj.id as string,
     sessionId: obj.sessionId as string,
-    index: obj.index as number,
-    message: uiMessage,
-    createdAt: timestampToDate(obj.createdAt as number),
-    updatedAt: timestampToDate(obj.updatedAt as number),
-    // 如果你在 proto 里保留了 metadata 字段，可以在 TS ConversationMessage 加 metadata 再转回来
+    msgIndex: obj.index as number,
+    message: JSON.parse(obj.uiMessageJson as string),
+    createdAt: fromTimestamp(obj.createdAt as number),
+    updatedAt: fromTimestamp(obj.updatedAt as number),
   }
 }
 
@@ -111,16 +109,16 @@ export function deserializeMessage(buffer: Buffer): ConversationMessage {
 export function serializeSession(session: ConversationSession): Buffer {
   const payload = {
     sessionId: session.sessionId,
-    userId: session.userId,
-    tenantId: session.tenantId,
+    userId: session.userId ?? undefined,
+    tenantId: session.tenantId ?? undefined,
     channel: session.channel === 'web-chat' ? 1 : session.channel === 'voice' ? 2 : 3,
-    title: session.title,
-    deleted: session.deleted,
-    startedAt: dateToTimestamp(session.startedAt),
-    lastMessageAt: dateToTimestamp(session.lastMessageAt),
-    createdAt: dateToTimestamp(session.createdAt),
-    updatedAt: dateToTimestamp(session.updatedAt),
-    metadata: metadataToProto(session.metadata),
+    title: session.title ?? undefined,
+    deleted: session.deleted ?? false,
+    startedAt: toTimestamp(session.startedAt),
+    lastMessageAt: toTimestamp(session.lastMessageAt),
+    createdAt: toTimestamp(session.createdAt),
+    updatedAt: toTimestamp(session.updatedAt),
+    metadata: metadataToProto((session.metadata as Record<string, unknown> | undefined) ?? {}),
   }
 
   const errMsg = ConversationSessionType.verify(payload)
@@ -147,23 +145,23 @@ export function deserializeSession(buffer: Buffer): ConversationSession {
     oneofs: true,
   })
 
-  const channelMap: Record<number, ConversationSession['channel']> = {
+  const channelMap: Record<number, string> = {
     1: 'web-chat',
     2: 'voice',
     3: 'api',
   }
 
   return {
-    sessionId: obj.sessionId,
-    userId: obj.userId,
-    tenantId: obj.tenantId,
-    channel: (channelMap[obj.channel as number] || 'web-chat') as ConversationSession['channel'],
-    title: obj.title,
-    deleted: obj.deleted,
-    startedAt: timestampToDate(obj.startedAt as number),
-    lastMessageAt: timestampToDate(obj.lastMessageAt as number),
-    createdAt: timestampToDate(obj.createdAt as number),
-    updatedAt: timestampToDate(obj.updatedAt as number),
-    metadata: metadataFromProto(obj.metadata),
+    sessionId: obj.sessionId as string,
+    userId: (obj.userId as string | undefined) ?? null,
+    tenantId: (obj.tenantId as string | undefined) ?? null,
+    channel: (channelMap[obj.channel as number] || 'web-chat') as string,
+    title: (obj.title as string | undefined) ?? null,
+    deleted: obj.deleted as boolean,
+    startedAt: fromTimestamp(obj.startedAt as number),
+    lastMessageAt: fromTimestamp(obj.lastMessageAt as number),
+    createdAt: fromTimestamp(obj.createdAt as number),
+    updatedAt: fromTimestamp(obj.updatedAt as number),
+    metadata: metadataFromProto(obj.metadata) as unknown,
   }
 }

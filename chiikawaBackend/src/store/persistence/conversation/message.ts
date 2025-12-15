@@ -1,39 +1,25 @@
-import { prisma } from '@/db/prisma'
-import {
-  ConversationMessageSchema,
-  type ConversationMessage,
-} from '../../schema/conversation/message'
-import type { PersistentMessageStore } from '../../schema/conversation/message'
-export const prismaMessageStore: PersistentMessageStore = {
+import { eq, asc } from 'drizzle-orm'
+import { db } from '@/db'
+import { conversationMessages } from '@/db/schema'
+import type { ConversationMessage, PersistentMessageStore } from '../../schema/conversation/message'
+
+/**
+ * Drizzle 实现的消息持久化存储
+ * 直接使用 Drizzle 类型，无需转换
+ */
+export const drizzleMessageStore: PersistentMessageStore = {
   async append(message: ConversationMessage): Promise<void> {
-    await prisma.conversation_messages.create({
-      data: {
-        id: message.id,
-        session_id: message.sessionId,
-        msg_index: message.index,
-        message: message.message as any,
-        created_at: message.createdAt,
-        updated_at: message.updatedAt,
-      },
-    })
+    await db.insert(conversationMessages).values(message)
   },
 
   async listBySessionId(sessionId: string): Promise<ConversationMessage[]> {
-    const rows = await prisma.conversation_messages.findMany({
-      where: { session_id: sessionId },
-      orderBy: { msg_index: 'asc' },
-    })
-
-    // 把 DB 记录映射回你的 Zod 结构，并用 Zod 做一次 parse
-    return rows.map((row) =>
-      ConversationMessageSchema.parse({
-        id: row.id,
-        sessionId: row.session_id,
-        index: row.msg_index,
-        message: row.message,
-        createdAt: row.created_at,
-        updatedAt: row.updated_at,
-      }),
-    )
+    return await db
+      .select()
+      .from(conversationMessages)
+      .where(eq(conversationMessages.sessionId, sessionId))
+      .orderBy(asc(conversationMessages.msgIndex))
   },
 }
+
+// 导出别名以保持向后兼容
+export const messageStore = drizzleMessageStore

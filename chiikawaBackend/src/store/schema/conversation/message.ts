@@ -1,38 +1,20 @@
-import { z } from 'zod'
-import type { UIMessage } from 'ai'
-
-export const ConversationMessageSchema = z.object({
-  id: z.string(),
-  sessionId: z.string(),
-  index: z.number().int().nonnegative(),
-  message: z.custom<UIMessage>(),
-  createdAt: z.date().optional(),
-  updatedAt: z.date().optional(),
-})
-
-export type ConversationMessage = z.infer<typeof ConversationMessageSchema>
-/**
- * MessageStore 方法参数和返回值的 Zod Schema
- */
-export const MessageStoreSchemas = {
-  append: {
-    args: z.object({
-      message: ConversationMessageSchema,
-    }),
-    returns: z.promise(z.void()),
-  },
-  listBySessionId: {
-    args: z.object({
-      sessionId: z.string(),
-    }),
-    returns: z.promise(z.array(ConversationMessageSchema)),
-  },
-} as const
+import type { InferSelectModel, InferInsertModel } from 'drizzle-orm'
+import { conversationMessages } from '@/db/schema'
 
 /**
- * MessageStore 类型定义
+ * ConversationMessage 类型 - 直接使用 Drizzle schema 推断，无需转换
  */
-export type MessageStore = {
+export type ConversationMessage = InferSelectModel<typeof conversationMessages>
+
+/**
+ * ConversationMessage 插入类型
+ */
+export type ConversationMessageInsert = InferInsertModel<typeof conversationMessages>
+
+/**
+ * MessageStore 接口定义
+ */
+export interface MessageStore {
   /**
    * 追加一条消息
    */
